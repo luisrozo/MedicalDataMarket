@@ -4,4 +4,4 @@ Esta aplicación descentralizada (dApp) está basada en **Ethereum**, **IPFS** y
 
 Este proyecto se ha realizado como Trabajo Fin de Grado para el Grado en Ingeniería Informática de la Universidad de Cádiz.
 
-![Tecnologías involucradas](https://www.photobox.co.uk/my/photo/full?photo_id=501355267343)
+![Tecnologías involucradas](https://i.imgur.com/JGqOsjq.png)
