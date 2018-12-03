@@ -11,7 +11,8 @@ class App extends Component {
     web3: null, 
     accounts: null, 
     contract: null,
-    name: "", 
+    name: "",
+    age: 0,
     ipfsHash: null,
     formIPFS: "",
     formAddress: "",
@@ -19,30 +20,49 @@ class App extends Component {
   };
 
   handleName = this.handleName.bind(this);
+  handleAge = this.handleAge.bind(this);
   handleReceiveIPFS = this.handleReceiveIPFS.bind(this);
   
   componentDidMount = async () => {
     try {
-      // Get network provider and web3 instance.
       const web3 = await getWeb3();
 
-      // Use web3 to get the user's accounts.
       const accounts = await web3.eth.getAccounts();
 
-      // Get the contract instance.
       const Contract = truffleContract(IPFSInboxContract);
       Contract.setProvider(web3.currentProvider);
       const instance = await Contract.deployed();
 
-      // Set web3, accounts, and contract to the state, and then proceed with an
-      // example of interacting with the contract's methods.
-      /*this.setState({ web3, accounts, contract: instance }, this.runExample);*/
       this.setState({
         web3, accounts, contract: instance
       });
+
       this.setEventListeners();
+
+      var Mockaroo = require('mockaroo');
+      var client = new Mockaroo.Client({
+        apiKey: 'a4d41710'
+      });
+
+      client.generate({
+        count: 1,
+        fields: [{
+          name: 'name',
+          type: 'First Name'
+        }, {
+          name: 'age',
+          type: 'Number',
+          min: 20,
+          max: 70
+        }]
+      }).then(function(record) {
+        this.setState({
+          name: record.name,
+          age: parseInt(record.age)
+        });
+      }.bind(this));
+
     } catch (error) {
-      // Catch any errors for any of the above operations.
       alert(
         `Failed to load web3, accounts, or contract. Check console for details.`
       );
@@ -61,6 +81,10 @@ class App extends Component {
     this.setState({ name: event.target.value });
   }
 
+  handleAge(event) {
+    this.setState({ age: event.target.value });
+  }
+
   convertToBuffer = async(reader) => {
     const buffer = await Buffer.from(reader.result);
     this.setState({buffer});
@@ -73,7 +97,8 @@ class App extends Component {
     const account = this.state.accounts[0]
 
     let patient = {
-      name: this.state.name
+      name: this.state.name,
+      age: this.state.age
     };
 
     var data = Buffer.from(JSON.stringify(patient));
@@ -105,11 +130,18 @@ class App extends Component {
 
         <h2>Introduce tus datos</h2>
         <form id="ipfs-hash-form" className="scep-form" onSubmit={this.onIPFSSubmit}>
-          <label>
-            Nombre <input type="text" value={this.state.name} onChange={this.handleName} />
-          </label>
 
+          <label>
+            Nombre <br /> <input type="text" value={this.state.name} onChange={this.handleName} />
+          </label>
+          <br />
+          <br />
+          <label>
+            Edad <br /> <input type="number" value={this.state.age} onChange={this.handleAge} />
+          </label>
+          <br /><br />
           <input type="submit" value="Submit" />
+
         </form>
 
         <p>Hash: {this.state.ipfsHash}</p>
