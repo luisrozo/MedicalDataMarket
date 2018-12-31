@@ -14,22 +14,20 @@ class App extends Component {
     name: "",
     age: 0,
     illness: "",
+    checkIllness: false,
     treatment: "",
+    checkTreatment: false,
     allergy: "",
+    checkAllergy: false,
     lastAppointment: "",
+    checkLastAppointment: false,
     ipfsHash: null,
     formIPFS: "",
     formAddress: "",
     receivedIPFS: "" 
   };
 
-  handleName = this.handleName.bind(this);
-  handleAge = this.handleAge.bind(this);
-  handleIllness = this.handleIllness.bind(this);
-  handleTreatment = this.handleTreatment.bind(this);
-  handleAllergy = this.handleAllergy.bind(this);
-  handleLastAppointment = this.handleLastAppointment.bind(this);
-  handleReceiveIPFS = this.handleReceiveIPFS.bind(this);
+  handleInputChange = this.handleInputChange.bind(this);
   
   componentDidMount = async () => {
     try {
@@ -107,28 +105,14 @@ class App extends Component {
       });
   }
 
-  handleName(event) {
-    this.setState({ name: event.target.value });
-  }
+  handleInputChange(event) {
+    const target = event.target;
+    const value = target.type === 'checkbox' ? target.checked : target.value;
+    const name = target.name;
 
-  handleAge(event) {
-    this.setState({ age: event.target.value });
-  }
-
-  handleIllness(event) {
-    this.setState({ illness: event.target.value });
-  }
-
-  handleTreatment(event) {
-    this.setState({ treatment: event.target.value });
-  }
-
-  handleAllergy(event) {
-    this.setState({ allergy: event.target.value });
-  }
-
-  handleLastAppointment(event) {
-    this.setState({ lastAppointment: event.target.value });
+    this.setState({
+      [name]: value
+    });
   }
 
   convertToBuffer = async(reader) => {
@@ -146,9 +130,13 @@ class App extends Component {
       name: this.state.name,
       age: this.state.age,
       illness: this.state.illness,
+      checkIllness: this.state.checkIllness,
       treatment: this.state.treatment,
+      checkTreatment: this.state.checkTreatment,
       allergy: this.state.allergy,
-      lastAppointment: this.state.lastAppointment
+      checkAllergy: this.state.checkAllergy,
+      lastAppointment: this.state.lastAppointment,
+      checkLastAppointment: this.state.checkLastAppointment
     };
 
     var data = Buffer.from(JSON.stringify(patient));
@@ -182,32 +170,44 @@ class App extends Component {
         <form id="ipfs-hash-form" className="scep-form" onSubmit={this.onIPFSSubmit}>
 
           <label>
-            Nombre <br /> <input type="text" value={this.state.name} onChange={this.handleName} />
+            Nombre 
+            <br /> 
+            <input name="name" type="text" value={this.state.name} onChange={this.handleInputChange} />
           </label>
           <br /><br />
 
           <label>
-            Edad <br /> <input type="number" value={this.state.age} onChange={this.handleAge} />
+            Edad 
+            <br /> 
+            <input name="age" type="number" value={this.state.age} onChange={this.handleInputChange} />
           </label>
           <br /><br />
 
           <label>
-            Enfermedad <br /> <input type="text" value={this.state.illness} onChange={this.handleIllness} />
+            Enfermedad <input name="checkIllness" type="checkbox" checked={this.state.checkIllness} onChange={this.handleInputChange} />
+            <br /> 
+            <input name="illness" type="text" value={this.state.illness} onChange={this.handleInputChange} />
           </label>
           <br /><br />
 
           <label>
-            Tratamiento <br /> <input type="text" value={this.state.treatment} onChange={this.handleTreatment} />
+            Tratamiento <input name="checkTreatment" type="checkbox" checked={this.state.checkTreatment} onChange={this.handleInputChange} />
+            <br /> 
+            <input name="treatment" type="text" value={this.state.treatment} onChange={this.handleInputChange} />
           </label>
           <br /><br />
 
           <label>
-            Alergia <br /> <input type="text" value={this.state.allergy} onChange={this.handleAllergy} />
+            Alergia <input name="checkAllergy" type="checkbox" checked={this.state.checkAllergy} onChange={this.handleInputChange} />
+            <br /> 
+            <input name="allergy" type="text" value={this.state.allergy} onChange={this.handleInputChange} />
           </label>
           <br /><br />
 
           <label>
-            Última cita <br /> <input type="text" value={this.state.lastAppointment} onChange={this.handleLastAppointment} />
+            Última cita <input name="checkLastAppointment" type="checkbox" checked={this.state.checkLastAppointment} onChange={this.handleInputChange} />
+            <br /> 
+            <input name="lastAppointment" type="text" value={this.state.lastAppointment} onChange={this.handleInputChange} />
           </label>
           <br /><br />
 
