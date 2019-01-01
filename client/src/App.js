@@ -21,6 +21,7 @@ class App extends Component {
     checkAllergy: false,
     lastAppointment: "",
     checkLastAppointment: false,
+    eth: 0,
     ipfsHash: null,
     formIPFS: "",
     formAddress: "",
@@ -86,7 +87,8 @@ class App extends Component {
           illness: record.illness,
           treatment: record.treatment,
           allergy: record.allergy,
-          lastAppointment: record.lastAppointment
+          lastAppointment: record.lastAppointment,
+          eth: 1
         });
       }.bind(this));
 
@@ -113,6 +115,27 @@ class App extends Component {
     this.setState({
       [name]: value
     });
+
+    if(target.type === 'checkbox') {
+      let modif = 0;
+      let current = this.state.eth;
+
+      if(name === 'checkLastAppointment') {
+        modif = 1;
+      } else if(name === 'checkAllergy') {
+        modif = 3;
+      } else {
+        modif = 5;
+      }
+
+      if(!value) {
+        modif *= -1;
+      }
+
+      this.setState({
+        eth: current + modif
+      });
+    }
   }
 
   convertToBuffer = async(reader) => {
@@ -136,7 +159,8 @@ class App extends Component {
       allergy: this.state.allergy,
       checkAllergy: this.state.checkAllergy,
       lastAppointment: this.state.lastAppointment,
-      checkLastAppointment: this.state.checkLastAppointment
+      checkLastAppointment: this.state.checkLastAppointment,
+      eth: this.state.eth
     };
 
     var data = Buffer.from(JSON.stringify(patient));
@@ -216,6 +240,9 @@ class App extends Component {
         </form>
 
         <p>Hash: {this.state.ipfsHash}</p>
+        <br />
+        <h3>Ganarás:</h3>
+        <h4>{this.state.eth} ETH</h4>
 
         <h2>Recupera tus datos</h2>
         <button onClick={this.handleReceiveIPFS}>Recuperar</button>
