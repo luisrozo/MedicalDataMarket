@@ -3,9 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "hashmap": "^2.3.0",
     "ipfs-api": "^26.1.2",
     "react": "^16.4.2",
     "react-dom": "^16.4.2",
+    "react-persist": "^1.0.2",
     "react-scripts": "1.1.4",
     "truffle-contract": "^4.0.0-next.0",
     "web3": "^1.0.0-beta.35"
