@@ -8,19 +8,26 @@ contract IPFSInbox {
     // Offer
     struct Offer {
         string ipfsHash;
-        string entity;
         string keywords;
     }
 
     uint numOffers;
     mapping (uint => Offer) offers;
 
-    function newOffer(string memory _ipfsHash, string memory _entity, string memory _keywords) public {
+    function newOffer(string memory _ipfsHash, string memory _keywords) public {
         uint256 offerID = numOffers++;
-        offers[offerID] = Offer(_ipfsHash, _entity, _keywords);
+        offers[offerID] = Offer(_ipfsHash, _keywords);
+
+        emit claimFileUploaded(_ipfsHash, _keywords);
     }
+
+    // function getOffersByScheme(string memory _keywords) public {
+
+    // }
     
     // Events
+    event claimFileUploaded(string _ipfsHash, string _keywords);
+
     event ipfsUploaded(string _ipfsHash, address _address);
     event inboxResponse(string response);
     

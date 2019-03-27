@@ -1,4 +1,7 @@
 import React, { Component } from "react";
+import Web3 from 'web3'
+import IPFSInboxContract from "./../IPFSInbox.json";
+import truffleContract from "truffle-contract";
 import ipfs from './../ipfs';
 import ReactTable from 'react-table';
 import "react-table/react-table.css";
@@ -6,6 +9,9 @@ import "react-table/react-table.css";
 class Custodian extends Component {
 
   state = {
+    web3: null,
+    account: '',
+    contract: null,
     schemeSelected: '',
     printTable: false,
     userColumns: [],
@@ -14,6 +20,7 @@ class Custodian extends Component {
     accounts: [],
     offer: {},
     offerFileIPFS: '',
+    claimFileIPFS: '',
 
   };
 
@@ -27,10 +34,29 @@ class Custodian extends Component {
     }
   }
 
-  componentWillMount() {
+  componentWillMount = async () => {
     document.body.style.padding = "25px 150px";
+
+    this.loadBlockchainData();
   }
 
+  async loadBlockchainData() {
+    const web3 = new Web3(Web3.givenProvider || "http://localhost:3000");
+    const accounts = await web3.eth.getAccounts();
+
+    const Contract = truffleContract(IPFSInboxContract);
+    Contract.setProvider(web3.currentProvider);
+    const instance = await Contract.deployed();
+
+    this.setState({ web3, account: accounts[0], contract: instance }, () => { this.setEventListeners(); });
+  }
+
+  setEventListeners() {
+    this.state.contract.claimFileUploaded()
+      .on('data', result => {
+        console.log(result.args[1])
+      });
+  }
   
   handleSelectChange(event) {
     let schemeSelected = event.target.value;
@@ -203,8 +229,6 @@ class Custodian extends Component {
   }
 
   onOfferSubmit = async(event) => {
-    //event.preventDefault();
-
     let offers = JSON.parse(localStorage.getItem('offers'));
     if(offers === null) {
       offers = [];
@@ -225,10 +249,59 @@ class Custodian extends Component {
         console.error(error)
         return
       }
-      this.setState({ offerFileIPFS: result[0].hash });
-      console.log("offerFile IPFS hash, ", result[0].hash);
+      this.setState({ offerFileIPFS: result[0].hash }, () => { this.createClaimFile(); });
     });
 
+  }
+
+  createClaimFile = async(event) => {
+    
+    var signature = await this.state.web3.eth.personal.sign(this.state.offerFileIPFS, this.state.account);
+    
+    let claim = {
+      offerFileIPFS: this.state.offerFileIPFS,
+      signature: signature
+    }
+
+    let claimFile = Buffer.from(JSON.stringify(claim));
+    ipfs.files.add(claimFile, (error, result) => {
+      if(error) {
+        console.error(error)
+        return
+      }
+      this.setState({ claimFileIPFS: result[0].hash }, () => { this.addOfferToBlockchain(); });
+      console.log("claimFile IPFS hash, ", result[0].hash);
+    });
+  }
+
+  addOfferToBlockchain = async(event) => {
+    let claimIPFS = this.state.claimFileIPFS;
+    let snomedCodes = this.getSnomedCodes(this.state.offer.esquema);
+    let contract = this.state.contract;
+
+    contract.newOffer(claimIPFS, snomedCodes, {from: this.state.account})
+      .then(result => { 
+        alert("Offer uploaded!");
+      })
+  }
+
+  getSnomedCodes(scheme) {
+    let codes = '';
+
+    if(scheme.includes("enfermedad")) {
+      codes = codes.concat('64572001,');
+    }
+    if(scheme.includes("tratamiento")) {
+      codes = codes.concat('276239002,');
+    }
+    if(scheme.includes("alergia")) {
+      codes = codes.concat('473011001,');
+    }
+    if(scheme.includes("ultimacita")) {
+      codes = codes.concat('185353001,');
+    }
+
+    return codes;
   }
 
   render() {
