@@ -10,10 +10,12 @@ import ReactDataGrid from "react-data-grid";
 //import "./styles.css";
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 
+import BuyOffers from './components/BuyOffers';
 import NewUser from './components/NewUser';
 import OwnerData from './components/OwnerData';
 import Custodian from './components/Custodian';
 import PageWrapper from './components/PageWrapper';
+import PurchasedOffers from './components/PurchasedOffers';
 
 import "./App.css";
 
@@ -384,6 +386,8 @@ class App extends Component {
           <Route exact path="/" render={(props) => <PageWrapper {...props} 
                                                     account={account} />} />
           <Route path="/ownerData" component={OwnerData} />
+          <Route path="/buyOffers" component={BuyOffers} />
+          <Route path="/purchasedOffers" component={PurchasedOffers} />
           <Route path="/newUser" component={NewUser} />          
           <Route path="/custodian" component={Custodian} />          
         </Switch>

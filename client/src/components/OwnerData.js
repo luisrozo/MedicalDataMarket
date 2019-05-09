@@ -1,11 +1,15 @@
 import React, { Component } from 'react';
+import { NavLink } from 'react-router-dom';
 
 class OwnerData extends Component {
 
   render() {
     const ownerData = JSON.parse(localStorage.getItem('ownerData'));
     return (
-      <div><center>
+      <div>
+        <NavLink to="/buyOffers">Comprar ofertas</NavLink><br />
+        <NavLink to="/purchasedOffers">Ver ofertas compradas</NavLink>
+        <center>
         <h1> Tus datos personales </h1><h3>Estos son los datos que has autorizado para ser vendidos</h3>
 
         <label>

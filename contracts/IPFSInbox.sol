@@ -2,9 +2,6 @@ pragma solidity ^0.5.0;
 
 contract IPFSInbox {
     
-    // Structures
-    mapping (address => string) ipfsInbox;
-
     // Offer
     struct Offer {
         string ipfsHash;
@@ -21,36 +18,22 @@ contract IPFSInbox {
         emit claimFileUploaded(_ipfsHash, _keywords);
     }
 
-    // function getOffersByScheme(string memory _keywords) public {
+    function getOfferById(uint _id) public view returns (string memory) {
+        return offers[_id].ipfsHash;
+    }
 
-    // }
+    function send(address _from, address payable[] memory _toAccounts) public payable {
+        require(msg.value > 0);
+
+        uint numAccounts = _toAccounts.length;
+        uint amountToTransfer = msg.value / numAccounts;
+
+        for (uint i = 0; i < numAccounts; i++) {
+            _toAccounts[i].transfer(amountToTransfer);
+        }      
+    }
     
-    // Events
+    // Event
     event claimFileUploaded(string _ipfsHash, string _keywords);
 
-    event ipfsUploaded(string _ipfsHash, address _address);
-    event inboxResponse(string response);
-    
-    // Modifiers
-    //modifier notFull (string _string) {bytes memory stringTest =  bytes(_string); require (stringTest.length == 0); _;}
-    
-    // An empty constructor that creates an instance of the contract
-    constructor() public {}
-    
-    function uploadIPFS(string memory _ipfsHash) public
-    {   
-        address owner = msg.sender;
-        ipfsInbox[owner] = _ipfsHash;
-        emit ipfsUploaded(_ipfsHash, owner);
-    }
-    
-    function getIPFS() public
-    {
-        string memory ipfs_hash = ipfsInbox[msg.sender];
-        if(bytes(ipfs_hash).length == 0) {
-            emit inboxResponse("Empty Inbox");
-        } else {
-            emit inboxResponse(ipfs_hash);
-        }
-    }
 }
