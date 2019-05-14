@@ -138,6 +138,19 @@ class BuyOffers extends Component {
 
             contract.send(this.state.account, usersToReceiveEth, { from: this.state.account, value: weiToPass });
 
+            let customersOffers = JSON.parse(localStorage.getItem('customersOffers'));
+            if(customersOffers == null) {
+                customersOffers = {}
+            }
+
+            if(customersOffers[this.state.account] == null) {
+                customersOffers[this.state.account] = [id];
+            } else {
+                customersOffers[this.state.account].push(id);
+            }
+
+            localStorage.setItem('customersOffers', JSON.stringify(customersOffers));
+
         }
     }
 
