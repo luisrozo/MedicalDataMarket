@@ -1,14 +1,52 @@
 import React, { Component } from 'react';
-import { NavLink } from 'react-router-dom';
+import {
+  Nav,
+  Navbar,
+  NavbarBrand,
+  NavItem,
+  NavLink,
+  } from 'reactstrap';
 
 class OwnerData extends Component {
 
   render() {
     const ownerData = JSON.parse(localStorage.getItem('ownerData'));
+
+    const navBarStyle = {
+      marginBottom: "50px"
+    };
+
+    const navBarBrandStyle = {
+      color: 'white'
+    };
+
+    const navBarSelectedTextStyle = {
+      color: 'white',
+      background: 'grey',
+      marginRight: "15px"
+    };
+
+    const navBarTextStyle = {
+      color: 'white',
+      marginRight: "15px"
+    };
+
     return (
       <div>
-        <NavLink to="/buyOffers">Comprar ofertas</NavLink><br />
-        <NavLink to="/purchasedOffers">Ver ofertas compradas</NavLink>
+        <Navbar style={navBarStyle} color="dark" light expand="md">
+          <NavbarBrand style={navBarBrandStyle} href="/ownerData">Medical Data Market</NavbarBrand>
+          <Nav className="ml-auto" navbar>
+              <NavItem>
+                <NavLink disabled style={navBarSelectedTextStyle} href="/ownerData">Mis datos</NavLink>
+              </NavItem>
+              <NavItem>
+                <NavLink style={navBarTextStyle} href="/buyOffers">Comprar Ofertas</NavLink>
+              </NavItem>
+              <NavItem>
+                <NavLink style={navBarTextStyle} href="/purchasedOffers">Ver ofertas compradas</NavLink>
+              </NavItem>
+          </Nav>
+        </Navbar>
         <center>
         <h1> Tus datos personales </h1><h3>Estos son los datos que has autorizado para ser vendidos</h3>
 

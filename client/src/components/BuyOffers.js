@@ -1,11 +1,17 @@
 import React, { Component } from "react";
-import { NavLink } from 'react-router-dom';
 import Web3 from 'web3'
 import IPFSInboxContract from "./../IPFSInbox.json";
 import truffleContract from "truffle-contract";
 import ipfs from './../ipfs';
 import { Container, Row, Col } from 'reactstrap';
 import OfferCard from './OfferCard';
+import {
+    Nav,
+    Navbar,
+    NavbarBrand,
+    NavItem,
+    NavLink,
+    } from 'reactstrap';
 
 class BuyOffers extends Component {
 
@@ -23,11 +29,14 @@ class BuyOffers extends Component {
         offersChain: [],
         printOffers: false,
         filterOffers: false,
+        custodianAccount: '0xcdd1c0407f7d4c6bf3dfb7cfc8e70d74b0fa99c3',
+        orderSelected: '',
 
     }
 
-    handleFilterChange = this.handleFilterChange.bind(this);
     selectOffer = this.selectOffer.bind(this);
+    handleFilterChange = this.handleFilterChange.bind(this);
+    handleOrder = this.handleOrder.bind(this);
 
     selectOffer(offer) {
         let filters = [];
@@ -65,6 +74,47 @@ class BuyOffers extends Component {
 
     }
 
+    handleOrder(event) {
+        
+        let newOrder = event.target.value;
+        let offers = this.isOffersFiltered() ? this.state.filteredOffers : this.state.offersChain;
+
+        let offersOrdered;
+
+        if(newOrder === 'precioAsc') {
+            offersOrdered = offers.sort(this.compareValues('precio'));
+        } else if(newOrder === 'precioDesc') {
+            offersOrdered = offers.sort(this.compareValues('precio', 'desc'));
+        } else if(newOrder === 'numRegAsc') {
+            offersOrdered = offers.sort(this.compareValues('numReg'));
+        } else {
+            offersOrdered = offers.sort(this.compareValues('numReg', 'desc'));
+        }
+
+        if(this.isOffersFiltered()) {
+            this.setState({ filteredOffers: offersOrdered, orderSelected: newOrder });
+        } else {
+            this.setState({ offersChain: offersOrdered, orderSelected: newOrder });
+        }
+    }
+
+    compareValues(key, order = 'asc') {
+        return function(a, b) {
+            if(!a.hasOwnProperty(key) || !b.hasOwnProperty(key)) {
+                return 0;
+            }
+
+            const varA = a[key];
+            const varB = b[key];
+
+            let comparison = varA > varB ? 1 : -1;
+
+            return (
+                (order === 'desc') ? (comparison * -1) : comparison
+            );            
+        };
+    }
+
     componentWillMount = async () => {
         this.loadBlockchainData();
     }
@@ -77,17 +127,14 @@ class BuyOffers extends Component {
         Contract.setProvider(web3.currentProvider);
         const instance = await Contract.deployed();
 
-        this.setState({ web3, account: accounts[0], contract: instance }, () => { this.loadOffers("all"); });
+        this.setState({ web3, account: accounts[0], contract: instance }, () => { this.loadOffers(); });
     }
 
-    loadOffers = async (schemeDataToLoad) => {
+    loadOffers = async () => {
         let contract = this.state.contract;
+        let web3 = this.state.web3;
         this.setState({ printOffers: false });
         let offers = JSON.parse(localStorage.getItem('offers'));
-
-        if(schemeDataToLoad !== "all") {
-            //filtrar offers
-        }
 
         let offersChain = [];
 
@@ -98,17 +145,22 @@ class BuyOffers extends Component {
                     ipfs.get(claimFileHash, function(err, files) {
                         files.forEach((file) => {
                             let claimFile = JSON.parse(file.content);
-
-                            ipfs.get(claimFile.offerFileIPFS, function(err, files) {
-                                files.forEach((file) => {
-                                    let offerFile = JSON.parse(file.content);
-                                    offersChain.push(offerFile);
-
-                                    if(offersChain.length === offers.length) {
-                                        this.setState({ offersChain, printOffers: true });
+                            web3.eth.personal.ecRecover(claimFile.offerFileIPFS, claimFile.signature)
+                                .then(addressWhoSigned => {
+                                    
+                                    if(addressWhoSigned === this.state.custodianAccount) {
+                                        ipfs.get(claimFile.offerFileIPFS, function(err, files) {
+                                            files.forEach((file) => {
+                                                let offerFile = JSON.parse(file.content);
+                                                offersChain.push(offerFile);
+            
+                                                if(offersChain.length === offers.length) {
+                                                    this.setState({ offersChain, printOffers: true });
+                                                }
+                                            })
+                                        }.bind(this)) 
                                     }
-                                })
-                            }.bind(this))                            
+                                });                                                    
                         });
                     }.bind(this));
 
@@ -173,10 +225,41 @@ class BuyOffers extends Component {
             )
         })
 
+        const navBarStyle = {
+            marginBottom: "50px"
+        };
+      
+        const navBarBrandStyle = {
+            color: 'white'
+        };
+
+        const navBarSelectedTextStyle = {
+            color: 'white',
+            background: 'grey',
+            marginRight: "15px"
+        };
+      
+        const navBarTextStyle = {
+            color: 'white',
+            marginRight: "15px"
+        };
+
         return (
             <div>
-                <NavLink to="/ownerData">Tus datos</NavLink><br />
-                <NavLink to="/purchasedOffers">Ver ofertas compradas</NavLink>
+                <Navbar style={navBarStyle} color="dark" light expand="md">
+                    <NavbarBrand style={navBarBrandStyle} href="/ownerData">Medical Data Market</NavbarBrand>
+                    <Nav className="ml-auto" navbar>
+                        <NavItem>
+                            <NavLink style={navBarTextStyle} href="/ownerData">Mis datos</NavLink>
+                        </NavItem>
+                        <NavItem>
+                            <NavLink disabled style={navBarSelectedTextStyle} href="/buyOffers">Comprar Ofertas</NavLink>
+                        </NavItem>
+                        <NavItem>
+                            <NavLink style={navBarTextStyle} href="/purchasedOffers">Ver ofertas compradas</NavLink>
+                        </NavItem>
+                    </Nav>
+                </Navbar>
 
                 <center>
                     <h1>Ofertas</h1>
@@ -197,6 +280,18 @@ class BuyOffers extends Component {
                     <label>
                         Última cita <input name="filterLastAppointment" type="checkbox" checked={this.state.filterLastAppointment || false} onChange={this.handleFilterChange} />
                     </label>
+
+                    <form>
+                        <label>
+                            <select value={this.state.orderSelected || ''} onChange={this.handleOrder}>
+                                <option value='' disabled>Ordenar ofertas...</option>
+                                <option key="pAsc" value="precioAsc">Por precio (de menos a más cara)</option>
+                                <option key="pDesc" value="precioDesc">Por precio (de más a menos cara)</option>                                                                
+                                <option key="nrAsc" value="numRegAsc">Por número de registros (de menor a mayor)</option>
+                                <option key="nrDesc" value="numRegDesc">Por número de registros (de mayor a menor)</option>
+                            </select>
+                        </label>
+                    </form>
 
                     { this.state.printOffers ? 
                         <React.Fragment>

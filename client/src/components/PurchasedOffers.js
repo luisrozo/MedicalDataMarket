@@ -1,9 +1,15 @@
 import React, { Component } from "react";
-import { NavLink } from 'react-router-dom';
 import Web3 from 'web3';
 import ReactTable from 'react-table';
 import "react-table/react-table.css";
 import ipfs from './../ipfs';
+import {
+    Nav,
+    Navbar,
+    NavbarBrand,
+    NavItem,
+    NavLink,
+    } from 'reactstrap';
 
 class PurchasedOffers extends Component {
 
@@ -29,8 +35,6 @@ class PurchasedOffers extends Component {
       }
 
     componentWillMount = async () => {
-        //document.body.style.padding = "25px 150px";
-
         const web3 = new Web3(Web3.givenProvider || "http://localhost:3000");
         const accounts = await web3.eth.getAccounts();
 
@@ -180,11 +184,42 @@ class PurchasedOffers extends Component {
             recordsColumns = this.getColumns();
             recordsData = this.getRecordsRows();
         }
+
+        const navBarStyle = {
+            marginBottom: "50px"
+        };
+      
+        const navBarBrandStyle = {
+            color: 'white'
+        };
+
+        const navBarSelectedTextStyle = {
+            color: 'white',
+            background: 'grey',
+            marginRight: "15px"
+        };
+      
+        const navBarTextStyle = {
+            color: 'white',
+            marginRight: "15px"
+        };
         
         return (
             <div>
-                <NavLink to="/ownerData">Tus datos</NavLink><br />
-                <NavLink to="/buyOffers">Comprar ofertas</NavLink>
+                <Navbar style={navBarStyle} color="dark" light expand="md">
+                    <NavbarBrand style={navBarBrandStyle} href="/ownerData">Medical Data Market</NavbarBrand>
+                    <Nav className="ml-auto" navbar>
+                        <NavItem>
+                            <NavLink style={navBarTextStyle} href="/ownerData">Mis datos</NavLink>
+                        </NavItem>
+                        <NavItem>
+                            <NavLink style={navBarTextStyle} href="/buyOffers">Comprar Ofertas</NavLink>
+                        </NavItem>
+                        <NavItem>
+                            <NavLink disabled style={navBarSelectedTextStyle} href="/purchasedOffers">Ver ofertas compradas</NavLink>
+                        </NavItem>
+                    </Nav>
+                </Navbar>
                 <center>
                 <h1>Tus ofertas</h1>
 
