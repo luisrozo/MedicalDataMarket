@@ -13,6 +13,8 @@ import {
     NavLink,
     } from 'reactstrap';
 
+import styles from './navbarStyle';
+
 class BuyOffers extends Component {
 
     state = {
@@ -136,6 +138,15 @@ class BuyOffers extends Component {
         this.setState({ printOffers: false });
         let offers = JSON.parse(localStorage.getItem('offers'));
 
+        let customersOffers = JSON.parse(localStorage.getItem('customersOffers'));
+
+        if(this.state.account in customersOffers) {
+            let offersGotByCustomer = customersOffers[this.state.account];
+            offers = offers.filter(offer => offersGotByCustomer.indexOf(offer.id) === -1);
+        }
+        
+        console.log(offers)
+
         let offersChain = [];
 
         for(var i = 0; i < offers.length; i++) {
@@ -203,6 +214,8 @@ class BuyOffers extends Component {
 
             localStorage.setItem('customersOffers', JSON.stringify(customersOffers));
 
+            // Mostrar notificación y ofrecer a usuario ir a ofertas compradas
+
         }
     }
 
@@ -225,38 +238,19 @@ class BuyOffers extends Component {
             )
         })
 
-        const navBarStyle = {
-            marginBottom: "50px"
-        };
-      
-        const navBarBrandStyle = {
-            color: 'white'
-        };
-
-        const navBarSelectedTextStyle = {
-            color: 'white',
-            background: 'grey',
-            marginRight: "15px"
-        };
-      
-        const navBarTextStyle = {
-            color: 'white',
-            marginRight: "15px"
-        };
-
         return (
             <div>
-                <Navbar style={navBarStyle} color="dark" light expand="md">
-                    <NavbarBrand style={navBarBrandStyle} href="/ownerData">Medical Data Market</NavbarBrand>
+                <Navbar style={styles.navBarStyle} color="dark" light expand="md">
+                    <NavbarBrand style={styles.navBarBrandStyle} href="/ownerData">Medical Data Market</NavbarBrand>
                     <Nav className="ml-auto" navbar>
                         <NavItem>
-                            <NavLink style={navBarTextStyle} href="/ownerData">Mis datos</NavLink>
+                            <NavLink style={styles.navBarTextStyle} href="/ownerData">Mis datos</NavLink>
                         </NavItem>
                         <NavItem>
-                            <NavLink disabled style={navBarSelectedTextStyle} href="/buyOffers">Comprar Ofertas</NavLink>
+                            <NavLink disabled style={styles.navBarSelectedTextStyle} href="/buyOffers">Comprar Ofertas</NavLink>
                         </NavItem>
                         <NavItem>
-                            <NavLink style={navBarTextStyle} href="/purchasedOffers">Ver ofertas compradas</NavLink>
+                            <NavLink style={styles.navBarTextStyle} href="/purchasedOffers">Ver ofertas compradas</NavLink>
                         </NavItem>
                     </Nav>
                 </Navbar>

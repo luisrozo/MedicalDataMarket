@@ -5,45 +5,29 @@ import {
   NavbarBrand,
   NavItem,
   NavLink,
-  } from 'reactstrap';
+} from 'reactstrap';
+import { Alert } from 'reactstrap';
+
+import styles from './navbarStyle';
 
 class OwnerData extends Component {
 
   render() {
     const ownerData = JSON.parse(localStorage.getItem('ownerData'));
 
-    const navBarStyle = {
-      marginBottom: "50px"
-    };
-
-    const navBarBrandStyle = {
-      color: 'white'
-    };
-
-    const navBarSelectedTextStyle = {
-      color: 'white',
-      background: 'grey',
-      marginRight: "15px"
-    };
-
-    const navBarTextStyle = {
-      color: 'white',
-      marginRight: "15px"
-    };
-
     return (
       <div>
-        <Navbar style={navBarStyle} color="dark" light expand="md">
-          <NavbarBrand style={navBarBrandStyle} href="/ownerData">Medical Data Market</NavbarBrand>
+        <Navbar style={styles.navBarStyle} color="dark" light expand="md">
+          <NavbarBrand style={styles.navBarBrandStyle} href="/ownerData">Medical Data Market</NavbarBrand>
           <Nav className="ml-auto" navbar>
               <NavItem>
-                <NavLink disabled style={navBarSelectedTextStyle} href="/ownerData">Mis datos</NavLink>
+                <NavLink disabled style={styles.navBarSelectedTextStyle} href="/ownerData">Mis datos</NavLink>
               </NavItem>
               <NavItem>
-                <NavLink style={navBarTextStyle} href="/buyOffers">Comprar Ofertas</NavLink>
+                <NavLink style={styles.navBarTextStyle} href="/buyOffers">Comprar Ofertas</NavLink>
               </NavItem>
               <NavItem>
-                <NavLink style={navBarTextStyle} href="/purchasedOffers">Ver ofertas compradas</NavLink>
+                <NavLink style={styles.navBarTextStyle} href="/purchasedOffers">Ver ofertas compradas</NavLink>
               </NavItem>
           </Nav>
         </Navbar>

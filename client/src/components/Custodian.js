@@ -5,6 +5,13 @@ import truffleContract from "truffle-contract";
 import ipfs from './../ipfs';
 import ReactTable from 'react-table';
 import "react-table/react-table.css";
+import { Alert } from 'reactstrap';
+import {
+  Navbar,
+  NavbarBrand,
+} from 'reactstrap';
+
+import styles from './navbarStyle';
 
 class Custodian extends Component {
 
@@ -21,21 +28,26 @@ class Custodian extends Component {
     offer: {},
     offerFileIPFS: '',
     claimFileIPFS: '',
+    visible: false,
 
   };
 
   handleSelectChange = this.handleSelectChange.bind(this);
+  onDismiss = this.onDismiss.bind(this);
 
   getProps=() => {
     return {
       style: {
-        marginBottom: "50px"
+        marginBottom: "50px",
+        marginRight: "250px",
+        marginLeft: "250px",
+        marginTop: "50px"
       }
     }
   }
 
   componentWillMount = async () => {
-    document.body.style.padding = "25px 150px";
+    document.body.style.paddingBottom = "200px";
 
     this.loadBlockchainData();
   }
@@ -48,7 +60,19 @@ class Custodian extends Component {
     Contract.setProvider(web3.currentProvider);
     const instance = await Contract.deployed();
 
-    this.setState({ web3, account: accounts[0], contract: instance }, () => { this.setEventListeners(); });
+    let previousNumOffers = localStorage.getItem("previousNumOffers");
+    let currentOffers = JSON.parse(localStorage.getItem('offers'));
+
+    let visible = false;
+
+    if(currentOffers !== null && currentOffers.length > previousNumOffers) {
+      visible = true;
+    }
+
+    localStorage.setItem("previousNumOffers", previousNumOffers+1)
+
+    this.setState({ web3, account: accounts[0], contract: instance, visible }, () => { this.setEventListeners(); });
+
   }
 
   setEventListeners() {
@@ -234,6 +258,8 @@ class Custodian extends Component {
       offers = [];
     }
 
+    localStorage.setItem('previousNumOffers', offers.length);
+
     offers.push({
       id: this.state.offer.id,
       esquema: this.state.offer.esquema,
@@ -280,8 +306,8 @@ class Custodian extends Component {
     let contract = this.state.contract;
 
     contract.newOffer(claimIPFS, snomedCodes, {from: this.state.account})
-      .then(result => { 
-        alert("Offer uploaded!");
+      .then(result => {
+        window.location.reload();
       })
   }
 
@@ -302,6 +328,10 @@ class Custodian extends Component {
     }
 
     return codes;
+  }
+
+  onDismiss() {
+    this.setState({ visible: false });
   }
 
   render() {
@@ -337,7 +367,11 @@ class Custodian extends Component {
       emptyOffer = true;
 
     return (
-      <div><center>
+      <div>
+        <Navbar style={styles.custodianNavBarStyle} expand="md">
+          <NavbarBrand style={styles.navBarBrandStyle} href="/custodian">Medical Data Market</NavbarBrand>
+        </Navbar>
+        <center>
         <h1>¡Eres el custodian!</h1>
 
         <h3>Estos son los esquemas disponibles para crear ofertas</h3>
@@ -405,6 +439,9 @@ class Custodian extends Component {
           </React.Fragment>
         }
         
+        <Alert color="info" isOpen={this.state.visible} toggle={this.onDismiss}>
+        Oferta subida con éxito
+        </Alert>
 
 
       </center></div>

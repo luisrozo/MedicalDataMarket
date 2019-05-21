@@ -11,6 +11,8 @@ import {
     NavLink,
     } from 'reactstrap';
 
+import styles from './navbarStyle';
+
 class PurchasedOffers extends Component {
 
     state = {
@@ -42,9 +44,14 @@ class PurchasedOffers extends Component {
     }
 
     loadCustomerOffers() {
-        let offersGotByCustomer = JSON.parse(localStorage.getItem('customersOffers'))[this.state.account];
-        let offers = JSON.parse(localStorage.getItem("offers"));
+        let customersOffers = JSON.parse(localStorage.getItem('customersOffers'));
+        let offersGotByCustomer = [];
 
+        if(customersOffers !== null) {
+            offersGotByCustomer = customersOffers[this.state.account];
+        }
+
+        let offers = JSON.parse(localStorage.getItem("offers"));
         let customerOffers = [];
 
         for(var i = 0; i < offersGotByCustomer.length; i++) {
@@ -144,141 +151,138 @@ class PurchasedOffers extends Component {
     }
 
     render() {
-        var offersColumns = [];
-        var data = [];
+        let hasOffersToShow = true;
 
-        if(this.state.printTable) {
-            offersColumns = [
-                {
-                    Header: "Esquema",
-                    accessor: "esquema",
-                    filterable: true,
-                },
-                {
-                    Header: "Núm. Registros",
-                    accessor: "numReg",
-                    filterable: true,
-                },
-                {
-                    Header: "Precio (ETH)",
-                    accessor: "precio",
-                    filterable: true,
+        if(this.state.offers.length === 0) {
+            hasOffersToShow = false;
+        } else {
+            var offersColumns = [];
+            var data = [];
+
+            if(this.state.printTable) {
+                offersColumns = [
+                    {
+                        Header: "Esquema",
+                        accessor: "esquema",
+                        filterable: true,
+                    },
+                    {
+                        Header: "Núm. Registros",
+                        accessor: "numReg",
+                        filterable: true,
+                    },
+                    {
+                        Header: "Precio (ETH)",
+                        accessor: "precio",
+                        filterable: true,
+                    }
+                ]
+                
+                for (var i = 0; i < this.state.offers.length; i++) {
+                    let dataValue = {
+                        id: this.state.offers[i].id,
+                        esquema: this.state.offers[i].esquema,
+                        numReg: this.state.offers[i].accounts.length,
+                        precio: this.state.offers[i].precio
+                    }
+                    data.push(dataValue);
                 }
-            ]
-            
-            for (var i = 0; i < this.state.offers.length; i++) {
-                let dataValue = {
-                    id: this.state.offers[i].id,
-                    esquema: this.state.offers[i].esquema,
-                    numReg: this.state.offers[i].accounts.length,
-                    precio: this.state.offers[i].precio
-                }
-                data.push(dataValue);
             }
-        }
-        
-        var recordsColumns = [];
-        var recordsData = [];
+            
+            var recordsColumns = [];
+            var recordsData = [];
 
-        if(this.state.printRecordTable) {
-            recordsColumns = this.getColumns();
-            recordsData = this.getRecordsRows();
-        }
-
-        const navBarStyle = {
-            marginBottom: "50px"
-        };
-      
-        const navBarBrandStyle = {
-            color: 'white'
-        };
-
-        const navBarSelectedTextStyle = {
-            color: 'white',
-            background: 'grey',
-            marginRight: "15px"
-        };
-      
-        const navBarTextStyle = {
-            color: 'white',
-            marginRight: "15px"
-        };
+            if(this.state.printRecordTable) {
+                recordsColumns = this.getColumns();
+                recordsData = this.getRecordsRows();
+            }
+        }        
         
         return (
             <div>
-                <Navbar style={navBarStyle} color="dark" light expand="md">
-                    <NavbarBrand style={navBarBrandStyle} href="/ownerData">Medical Data Market</NavbarBrand>
+                <Navbar style={styles.navBarStyle} color="dark" light expand="md">
+                    <NavbarBrand style={styles.navBarBrandStyle} href="/ownerData">Medical Data Market</NavbarBrand>
                     <Nav className="ml-auto" navbar>
                         <NavItem>
-                            <NavLink style={navBarTextStyle} href="/ownerData">Mis datos</NavLink>
+                            <NavLink style={styles.navBarTextStyle} href="/ownerData">Mis datos</NavLink>
                         </NavItem>
                         <NavItem>
-                            <NavLink style={navBarTextStyle} href="/buyOffers">Comprar Ofertas</NavLink>
+                            <NavLink style={styles.navBarTextStyle} href="/buyOffers">Comprar Ofertas</NavLink>
                         </NavItem>
                         <NavItem>
-                            <NavLink disabled style={navBarSelectedTextStyle} href="/purchasedOffers">Ver ofertas compradas</NavLink>
+                            <NavLink disabled style={styles.navBarSelectedTextStyle} href="/purchasedOffers">Ver ofertas compradas</NavLink>
                         </NavItem>
                     </Nav>
                 </Navbar>
                 <center>
                 <h1>Tus ofertas</h1>
 
-                <h3>Estas son las ofertas que has comprado</h3>
-                <h5><i>Haz click en una fila para ver los registros de una oferta</i></h5> 
+                { hasOffersToShow ?
+                   <React.Fragment>
+                       <h3>Estas son las ofertas que has comprado</h3>
+                        <h5><i>Haz click en una fila para ver los registros de una oferta</i></h5> 
 
-                { this.state.printTable ?
-                    <React.Fragment>
-                        <ReactTable
-                            columns={offersColumns}
-                            data={data}
-                            showPagination={false}
-                            minRows={0}
-                            getProps={this.getProps}
-                            defaultFilterMethod={ (filter, row, column) => {
-                                const id = filter.pivotId || filter.id
-                                return row[id] !== undefined ? String(row[id]).includes(filter.value) : true
-                            }}
-                            getTdProps={(state, rowInfo, column, instance) => {
-                                return {
-                                  onClick: (e, handleOriginal) => {
-                                    this.loadRecords(rowInfo.original.id)
-                                  }
-                                }
-                              }}
-                            noDataText='No existen ofertas que mostrar'
-                            getTrProps={(state, rowInfo, column) => {
-                                return {
-                                  style: {
-                                    background: rowInfo.original.id === this.state.selectedOfferId ? 'lightcyan' : 'white'
-                                  }
-                                }
-                            }}
-                            >
-                        </ReactTable>
-                    </React.Fragment>
+                        { this.state.printTable ?
+                            <React.Fragment>
+                                <ReactTable
+                                    columns={offersColumns}
+                                    data={data}
+                                    showPagination={false}
+                                    minRows={0}
+                                    getProps={this.getProps}
+                                    defaultFilterMethod={ (filter, row, column) => {
+                                        const id = filter.pivotId || filter.id
+                                        return row[id] !== undefined ? String(row[id]).includes(filter.value) : true
+                                    }}
+                                    getTdProps={(state, rowInfo, column, instance) => {
+                                        return {
+                                        onClick: (e, handleOriginal) => {
+                                            this.loadRecords(rowInfo.original.id)
+                                        }
+                                        }
+                                    }}
+                                    noDataText='No existen ofertas que mostrar'
+                                    getTrProps={(state, rowInfo, column) => {
+                                        return {
+                                        style: {
+                                            background: rowInfo.original.id === this.state.selectedOfferId ? 'lightcyan' : 'white'
+                                        }
+                                        }
+                                    }}
+                                    >
+                                </ReactTable>
+                            </React.Fragment>
+                            :
+                            <React.Fragment>
+                                <i>Cargando ofertas compradas...</i>
+                            </React.Fragment>
+                        }
+
+                        { this.state.printRecordTable ? 
+                            <React.Fragment>
+                                <h4>Registros de la oferta seleccionada: </h4>
+                                <ReactTable
+                                    columns={recordsColumns}
+                                    data={recordsData}
+                                    showPagination={false}
+                                    minRows={0}
+                                    getProps={this.getProps}
+                                    >
+                                </ReactTable>
+                            </React.Fragment>
+                            :
+                            <React.Fragment>
+                                <h5><i>Selecciona una fila para ver aquí los registros:</i></h5>
+                            </React.Fragment>
+                        }
+                   </React.Fragment> 
                     :
                     <React.Fragment>
-                        <i>Cargando ofertas compradas...</i>
+                        <h3>Aún no has comprado ninguna oferta. </h3>
+                        <h5>Haz click <a href="/buyOffers">aquí</a> para comprar ofertas.</h5>
                     </React.Fragment>
                 }
-
-                { this.state.printRecordTable ? 
-                    <React.Fragment>
-                        <h4>Registros de la oferta seleccionada: </h4>
-                        <ReactTable
-                            columns={recordsColumns}
-                            data={recordsData}
-                            showPagination={false}
-                            minRows={0}
-                            getProps={this.getProps}
-                            >
-                        </ReactTable>
-                    </React.Fragment>
-                    :
-                    <React.Fragment>
-                        <h5><i>Selecciona una fila para ver aquí los registros:</i></h5>
-                    </React.Fragment>
-                }
+                
             </center></div>
         );
     }

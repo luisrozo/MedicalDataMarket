@@ -11,6 +11,14 @@ contract IPFSInbox {
     uint numOffers;
     mapping (uint => Offer) offers;
 
+    function getNumOffers()
+        public
+        view
+        returns (uint)
+    {
+        return numOffers;
+    }
+
     function newOffer(string memory _ipfsHash, string memory _keywords) 
         public 
     {

@@ -1,7 +1,13 @@
 import React, { Component } from "react";
 import { generateData } from './../services/generateRandomData';
 import ipfs from './../ipfs';
-import { Redirect } from 'react-router-dom'
+import { Redirect } from 'react-router-dom';
+import {
+  Navbar,
+  NavbarBrand,
+} from 'reactstrap';
+
+import styles from './navbarStyle';
 
 class NewUser extends Component {
 
@@ -136,68 +142,73 @@ class NewUser extends Component {
 
     this.setState({ goToOwnerData: true });
 
-    // contract.uploadIPFS(this.state.ipfsHash, {from: account})
-    //   .then(result => { 
-    //     alert("Contract used!");
-    //   })
   };
   
   render() {
+    const inputStyle = {
+      border: "none",
+      textAlign: "center"
+    }
+
     if(this.state.goToOwnerData) {
       return <Redirect to="/ownerData" />
     }
     return (
-      <div><center>
-        <h3>Selecciona qué datos clínicos autorizas para ser vendidos</h3>
+      <div>
+        <Navbar style={styles.navBarStyle} color="dark" light expand="md">
+          <NavbarBrand style={styles.navBarBrandStyle} href="/newUser">Medical Data Market</NavbarBrand>
+        </Navbar>
+        <center>
+        <h2>Valida tus datos</h2>
+        <h4>Selecciona qué datos clínicos autorizas para ser vendidos</h4>
         <form id="ipfs-hash-form" className="scep-form" onSubmit={this.onIPFSSubmit}>
 
           <label>
-            Nombre 
+            <b>Nombre</b> 
             <br /> 
-            <input name="name" type="text" value={this.state.ownerData.name || ''} onChange={this.handleInputChange} />
+            <input style={inputStyle} readOnly size="60" name="name" type="text" value={this.state.ownerData.name || ''} onChange={this.handleInputChange} />
           </label>
           <br /><br />
 
           <label>
-            Edad 
+            <b>Edad</b> 
             <br /> 
-            <input name="age" type="number" value={this.state.ownerData.age || 0} onChange={this.handleInputChange} />
+            <input style={inputStyle} readOnly size="60" name="age" type="number" value={this.state.ownerData.age || 0} onChange={this.handleInputChange} />
           </label>
           <br /><br />
 
           <label>
-            Enfermedad <input name="checkIllness" type="checkbox" checked={this.state.ownerData.checkIllness || false} onChange={this.handleInputChange} />
+            <b>Enfermedad</b> <input name="checkIllness" type="checkbox" checked={this.state.ownerData.checkIllness || false} onChange={this.handleInputChange} />
             <br /> 
-            <input name="illness" type="text" value={this.state.ownerData.illness || ''} onChange={this.handleInputChange} />
+            <input style={inputStyle} readOnly size="60" name="illness" type="text" value={this.state.ownerData.illness || ''} onChange={this.handleInputChange} />
           </label>
           <br /><br />
 
           <label>
-            Tratamiento <input name="checkTreatment" type="checkbox" checked={this.state.ownerData.checkTreatment || false} onChange={this.handleInputChange} />
+            <b>Tratamiento</b> <input name="checkTreatment" type="checkbox" checked={this.state.ownerData.checkTreatment || false} onChange={this.handleInputChange} />
             <br /> 
-            <input name="treatment" type="text" value={this.state.ownerData.treatment || ''} onChange={this.handleInputChange} />
+            <input style={inputStyle} readOnly size="60" name="treatment" type="text" value={this.state.ownerData.treatment || ''} onChange={this.handleInputChange} />
           </label>
           <br /><br />
 
           <label>
-            Alergia <input name="checkAllergy" type="checkbox" checked={this.state.ownerData.checkAllergy || false} onChange={this.handleInputChange} />
+            <b>Alergia</b> <input name="checkAllergy" type="checkbox" checked={this.state.ownerData.checkAllergy || false} onChange={this.handleInputChange} />
             <br /> 
-            <input name="allergy" type="text" value={this.state.ownerData.allergy || ''} onChange={this.handleInputChange} />
+            <input style={inputStyle} readOnly size="60" name="allergy" type="text" value={this.state.ownerData.allergy || ''} onChange={this.handleInputChange} />
           </label>
           <br /><br />
 
           <label>
-            Última cita <input name="checkLastAppointment" type="checkbox" checked={this.state.ownerData.checkLastAppointment || false} onChange={this.handleInputChange} />
+            <b>Última cita</b> <input name="checkLastAppointment" type="checkbox" checked={this.state.ownerData.checkLastAppointment || false} onChange={this.handleInputChange} />
             <br /> 
-            <input name="lastAppointment" type="text" value={this.state.ownerData.lastAppointment || ''} onChange={this.handleInputChange} />
+            <input style={inputStyle} readOnly size="60" name="lastAppointment" type="text" value={this.state.ownerData.lastAppointment || ''} onChange={this.handleInputChange} />
           </label>
           <br /><br />
 
-          <input type="submit" value="Submit" />
+          <input type="submit" value="Validar" />
 
         </form>
 
-        <p>Hash: {this.state.ipfsHash}</p>
         <br />
         <h3>Ganarás:</h3>
         <h4><span style={{color: 'blue'}}> {this.state.ownerData.eth || 0} ETH </span></h4>
