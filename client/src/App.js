@@ -1,13 +1,7 @@
 import React, { Component } from "react";
-import IPFSInboxContract from "./IPFSInbox.json";
 import getWeb3 from "./utils/getWeb3";
-import truffleContract from "truffle-contract";
 import ipfs from './ipfs';
-import { retrieveData, initOwner } from './services/retrieveOwnerData';
-import { generateData } from './services/generateRandomData';
 import { makeString } from './services/randomString';
-import ReactDataGrid from "react-data-grid";
-//import "./styles.css";
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 
 import BuyOffers from './components/BuyOffers';
@@ -28,17 +22,6 @@ class App extends Component {
     numOfferFiles: 0,
     offerPatients: {},
     entity: "Mayo clinic",
-    //name: "",
-    // age: 0,
-    // illness: "",
-    // checkIllness: false,
-    // treatment: "",
-    // checkTreatment: false,
-    // allergy: "",
-    // checkAllergy: false,
-    // lastAppointment: "",
-    // checkLastAppointment: false,
-    // eth: 0,
     ipfsHash: null,
     ownerData: {},
     patientHashes: {},
@@ -51,9 +34,6 @@ class App extends Component {
     offerCreationColumns: [{ key: 'nombre', name: 'Nombre'}, { key: 'edad', name: 'Edad'}],
     offerCreationRows: [],
     selectedIndexes: [],
-    // formIPFS: "",
-    // formAddress: "",
-    // receivedIPFS: "" 
   };
 
   handleInputChange = this.handleInputChange.bind(this);
@@ -62,24 +42,12 @@ class App extends Component {
   
   componentWillMount = async () => {
     try {
-      //alert("componentWillMount de App.js")
+      
       const web3 = await getWeb3();
-      //alert("Pasado web3")
 
       const accounts = await web3.eth.getAccounts();
 
-      // const Contract = truffleContract(IPFSInboxContract);
-      // Contract.setProvider(web3.currentProvider);
-      //const instance = await Contract.deployed();
-
-      // this.setState({
-      //   web3, accounts, contract: instance
-      // });
-      //this.setState({ web3, accounts});
-
-      // localStorage.setItem('contract', instance);
       localStorage.setItem('account', accounts[0]);
-      //alert("isDataSubmitted a false")
       localStorage.setItem("isDataSubmitted", false);
 
       //----------------------------------------------------
@@ -92,42 +60,24 @@ class App extends Component {
         });
       }
 
-      // this.setState({
-      //   offerCreationRows: rows
-      // })
-
-      // ---------------------------------------------------
-
-      // this.setEventListeners();
 
       var previousPatientHashes = JSON.parse(localStorage.getItem('patientHashes'));
       var previousSchemesCount = JSON.parse(localStorage.getItem('schemesCount'));
       var previousNumOfferFiles = JSON.parse(localStorage.getItem('numOfferFiles'));
 
-      // this.setState({
-      //   ownerData: initOwner(),
-      //   patientHashes: previousPatientHashes,
-      //   schemesCount: previousSchemesCount,
-      //   numOfferFiles: previousNumOfferFiles
-      // });
-
-      //alert("Tipo de usuario")
-      if(accounts[0] === this.state.custodianAccount) { // ¿El usuario es el custodian?
-        //alert("Es el custodian")
+      if(accounts[0] === this.state.custodianAccount) { 
         localStorage.setItem("isCustodian", true);
         this.setState({ loading: false });
 
-      } else if(previousPatientHashes != null && accounts[0] in previousPatientHashes) { // Si es owner, ¿ha subido ya sus datos?
-        //alert("Tiene los datos subidos")
+      } else if(previousPatientHashes != null && accounts[0] in previousPatientHashes) { 
         localStorage.setItem("isDataSubmitted", true);
 
         var userHash = previousPatientHashes[accounts[0]].hash
-        //alert(userHash);
+        
 
         ipfs.get(userHash, function (err, files) {
           files.forEach((file) => {
             var ownerData = JSON.parse(file.content);
-            //alert("setOwnerData en App.js")
             localStorage.setItem('ownerData', JSON.stringify(ownerData));
             this.setState({ loading: false });
           })
@@ -144,13 +94,6 @@ class App extends Component {
       console.log(error);
     }
   };
-
-  // setEventListeners() {
-  //   this.state.contract.inboxResponse()
-  //     .on('data', result => {
-  //       this.setState({receivedIPFS: result.args[0]})
-  //     });
-  // }
 
   handleInputChange(event) {
     const target = event.target;
@@ -228,18 +171,12 @@ class App extends Component {
       dataScheme = dataScheme.slice(0, -1);
     }
 
-    // Montar tabla hash
-
     var hashes = this.state.patientHashes;
     if(hashes == null) {
       hashes = {}
     }
     hashes[account] = { hash: ipfsResult[0].hash, scheme: dataScheme };
     this.setState({ patientHashes: hashes });
-
-    //alert(hashes[account].hash);
-
-    // Actualizar conteo de esquemas
 
     var schemes = this.state.schemesCount;
 
@@ -256,15 +193,7 @@ class App extends Component {
       schemes[dataScheme] = 1;
     }
 
-    //alert(Object.keys(schemes).length);
-
-    /*if(newSchemesCount % 2 === 0) {
-      this.createOfferFile();
-    }*/
-
     this.setState({ schemesCount: schemes });
-
-    //alert(schemes[dataScheme]);
 
     localStorage.setItem('patientHashes', JSON.stringify(hashes));
     localStorage.setItem('schemesCount', JSON.stringify(schemes));
@@ -301,10 +230,6 @@ class App extends Component {
     this.setState({ numOfferFiles: this.state.numOfferFiles + 1 });
 
     var offerFile = Buffer.from(JSON.stringify(offer));
-    //var ipfsResult = await ipfs.add(offerFile)
-
-    // Obtenemos IPFS hash de OfferFile, que irá en Claim File
-    //var ipfsOffer = ipfsResult[0].hash;
 
     localStorage.setItem('numOfferFiles', this.state.numOfferFiles);
   }
@@ -369,14 +294,8 @@ class App extends Component {
   }
 
   render() {
-    //const isDataSubmitted = localStorage.getItem('isDataSubmitted');
-    const {schemesCount} = this.state;
     const account = localStorage.getItem('account');
-    const contract = this.state.contract;
 
-    // if (!this.state.web3) {
-    //   return <div>Loading Web3, accounts, and contract...</div>;
-    // }
     if(this.state.loading) {
       return <div>Loading...</div>
     }

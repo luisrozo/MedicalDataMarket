@@ -22,5 +22,10 @@ export default {
         color: 'white',
         marginRight: "15px"
     },
+
+    navBarProfitStyle: {
+        color: 'white',
+        marginRight: "400px"
+    }
 }
 

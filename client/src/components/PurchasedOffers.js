@@ -47,7 +47,7 @@ class PurchasedOffers extends Component {
         let customersOffers = JSON.parse(localStorage.getItem('customersOffers'));
         let offersGotByCustomer = [];
 
-        if(customersOffers !== null) {
+        if(customersOffers !== null && this.state.account in customersOffers) {
             offersGotByCustomer = customersOffers[this.state.account];
         }
 
@@ -196,13 +196,22 @@ class PurchasedOffers extends Component {
                 recordsColumns = this.getColumns();
                 recordsData = this.getRecordsRows();
             }
-        }        
+        }
+
+        let profits = JSON.parse(localStorage.getItem("usersProfit"));
+        let userProfit = 0;
+        if(this.state.account in profits) {
+            userProfit = profits[this.state.account];
+        }
         
         return (
             <div>
                 <Navbar style={styles.navBarStyle} color="dark" light expand="md">
                     <NavbarBrand style={styles.navBarBrandStyle} href="/ownerData">Medical Data Market</NavbarBrand>
                     <Nav className="ml-auto" navbar>
+                        <NavItem>
+                            <NavLink disabled style={styles.navBarProfitStyle}><i>Tu beneficio: {userProfit} ETH</i></NavLink>
+                        </NavItem>
                         <NavItem>
                             <NavLink style={styles.navBarTextStyle} href="/ownerData">Mis datos</NavLink>
                         </NavItem>

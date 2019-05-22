@@ -439,7 +439,7 @@ class Custodian extends Component {
           </React.Fragment>
         }
         
-        <Alert color="info" isOpen={this.state.visible} toggle={this.onDismiss}>
+        <Alert style={{ width: "50%" }} color="info" isOpen={this.state.visible} toggle={this.onDismiss}>
         Oferta subida con éxito
         </Alert>
 

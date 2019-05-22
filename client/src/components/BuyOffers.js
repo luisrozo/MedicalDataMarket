@@ -13,6 +13,7 @@ import {
     NavLink,
     } from 'reactstrap';
 
+import { Alert } from 'reactstrap';
 import styles from './navbarStyle';
 
 class BuyOffers extends Component {
@@ -33,12 +34,14 @@ class BuyOffers extends Component {
         filterOffers: false,
         custodianAccount: '0xcdd1c0407f7d4c6bf3dfb7cfc8e70d74b0fa99c3',
         orderSelected: '',
+        showNotification: false,
 
     }
 
     selectOffer = this.selectOffer.bind(this);
     handleFilterChange = this.handleFilterChange.bind(this);
     handleOrder = this.handleOrder.bind(this);
+    onDismiss = this.onDismiss.bind(this);
 
     selectOffer(offer) {
         let filters = [];
@@ -139,18 +142,19 @@ class BuyOffers extends Component {
         let offers = JSON.parse(localStorage.getItem('offers'));
 
         let customersOffers = JSON.parse(localStorage.getItem('customersOffers'));
+        let offersGotByCustomer = [];
 
-        if(this.state.account in customersOffers) {
-            let offersGotByCustomer = customersOffers[this.state.account];
+        if(customersOffers !== null && this.state.account in customersOffers) {
+            offersGotByCustomer = customersOffers[this.state.account];
             offers = offers.filter(offer => offersGotByCustomer.indexOf(offer.id) === -1);
         }
-        
-        console.log(offers)
 
         let offersChain = [];
 
         for(var i = 0; i < offers.length; i++) {
-            contract.getOfferById(i, { from: this.state.account })
+            let offerId = offers[i].id - 1;
+            
+            contract.getOfferById(offerId, { from: this.state.account })
                 .then(claimFileHash => {
                     
                     ipfs.get(claimFileHash, function(err, files) {
@@ -199,7 +203,13 @@ class BuyOffers extends Component {
             let weiToPass = offer.precio * 1000000000000000000;
             let usersToReceiveEth = offers.filter(offer => offer.id === id)[0].accounts;
 
-            contract.send(this.state.account, usersToReceiveEth, { from: this.state.account, value: weiToPass });
+            contract.send(this.state.account, usersToReceiveEth, { from: this.state.account, value: weiToPass })
+                .then(() => {
+                    let offersWithoutBoughtOne = this.state.offersChain.filter(offer => offer.id !== id);
+                    console.log(offersWithoutBoughtOne)
+                    this.setState({ offersChain: offersWithoutBoughtOne, showNotification: true });
+
+                });
 
             let customersOffers = JSON.parse(localStorage.getItem('customersOffers'));
             if(customersOffers == null) {
@@ -214,17 +224,45 @@ class BuyOffers extends Component {
 
             localStorage.setItem('customersOffers', JSON.stringify(customersOffers));
 
-            // Mostrar notificación y ofrecer a usuario ir a ofertas compradas
-
+            this.updateUsersProfit(usersToReceiveEth, offer.precio/usersToReceiveEth.length);
         }
+    }
+
+    updateUsersProfit(usersToUpdateProfit, howMuch) {
+        let usersProfit = JSON.parse(localStorage.getItem("usersProfit"));
+        if(usersProfit == null) {
+            usersProfit = {}
+        }
+
+        for(var i = 0; i < usersToUpdateProfit.length; i++) {
+            let user = usersToUpdateProfit[i];
+
+            if(user in usersProfit) {
+                let newProfit = usersProfit[user] + howMuch;
+                usersProfit[user] = newProfit;
+            } else {
+                usersProfit[user] = howMuch;
+            }
+        }
+
+        localStorage.setItem("usersProfit", JSON.stringify(usersProfit));
     }
 
     isOffersFiltered() {
         return this.state.filterIllness || this.state.filterTreatment || this.state.filterAllergy || this.state.filterLastAppointment;
     }
 
+    onDismiss() {
+        this.setState({ showNotification: false });
+    }
+
+    hasOffers() {
+        return this.state.offersChain.length !== 0;
+    }
+
     render() {
         let offers = [];
+        let existOffers = this.hasOffers();
 
         if(this.state.printOffers) {
             offers = this.isOffersFiltered() ? this.state.filteredOffers : this.state.offersChain;
@@ -238,11 +276,20 @@ class BuyOffers extends Component {
             )
         })
 
+        let profits = JSON.parse(localStorage.getItem("usersProfit"));
+        let userProfit = 0;
+        if(this.state.account in profits) {
+            userProfit = profits[this.state.account];
+        }
+
         return (
             <div>
                 <Navbar style={styles.navBarStyle} color="dark" light expand="md">
                     <NavbarBrand style={styles.navBarBrandStyle} href="/ownerData">Medical Data Market</NavbarBrand>
                     <Nav className="ml-auto" navbar>
+                        <NavItem>
+                            <NavLink disabled style={styles.navBarProfitStyle}><i>Tu beneficio: {userProfit} ETH</i></NavLink>
+                        </NavItem>
                         <NavItem>
                             <NavLink style={styles.navBarTextStyle} href="/ownerData">Mis datos</NavLink>
                         </NavItem>
@@ -287,19 +334,34 @@ class BuyOffers extends Component {
                         </label>
                     </form>
 
+                    <Alert style={{ width: "50%" }} color="info" isOpen={this.state.showNotification} toggle={this.onDismiss}>
+                        Oferta comprada con éxito. Puedes ver tus ofertas compradas <a href="/purchasedOffers">aquí</a>.
+                    </Alert>
+
                     { this.state.printOffers ? 
                         <React.Fragment>
-                            <Container fluid>
-                                <Row>
-                                    {offerCards}
-                                </Row>
-                            </Container>
+                            { existOffers ?
+                                <React.Fragment>
+                                    <Container fluid>
+                                        <Row>
+                                            {offerCards}
+                                        </Row>
+                                    </Container>
+                                </React.Fragment>
+                                :
+                                <React.Fragment>
+                                    <Alert style={{ width: "50%" }} color="warning" isOpen={true}>
+                                        No hay ofertas disponibles.
+                                    </Alert>
+                                </React.Fragment>
+                            }                            
                         </React.Fragment>
                         :
                         <React.Fragment>
                             <p><i>Cargando ofertas...</i></p>
                         </React.Fragment>
                     }
+                    
                     
                 </center>
             </div>

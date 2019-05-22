@@ -6,7 +6,6 @@ import {
   NavItem,
   NavLink,
 } from 'reactstrap';
-import { Alert } from 'reactstrap';
 
 import styles from './navbarStyle';
 
@@ -14,12 +13,22 @@ class OwnerData extends Component {
 
   render() {
     const ownerData = JSON.parse(localStorage.getItem('ownerData'));
+    const account = localStorage.getItem("account");
+    
+    let profits = JSON.parse(localStorage.getItem("usersProfit"));
+    let userProfit = 0;
+    if(account in profits) {
+        userProfit = profits[account];
+    }
 
     return (
       <div>
         <Navbar style={styles.navBarStyle} color="dark" light expand="md">
           <NavbarBrand style={styles.navBarBrandStyle} href="/ownerData">Medical Data Market</NavbarBrand>
           <Nav className="ml-auto" navbar>
+              <NavItem>
+                <NavLink disabled style={styles.navBarProfitStyle}><i>Tu beneficio: {userProfit} ETH</i></NavLink>
+              </NavItem>
               <NavItem>
                 <NavLink disabled style={styles.navBarSelectedTextStyle} href="/ownerData">Mis datos</NavLink>
               </NavItem>
