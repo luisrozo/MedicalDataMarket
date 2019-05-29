@@ -140,6 +140,10 @@ class BuyOffers extends Component {
         let web3 = this.state.web3;
         this.setState({ printOffers: false });
         let offers = JSON.parse(localStorage.getItem('offers'));
+        if(offers === null) {
+            offers = [];
+            this.setState({ offersChain: [], printOffers: true });
+        }
 
         let customersOffers = JSON.parse(localStorage.getItem('customersOffers'));
         let offersGotByCustomer = [];
@@ -158,25 +162,33 @@ class BuyOffers extends Component {
                 .then(claimFileHash => {
                     
                     ipfs.get(claimFileHash, function(err, files) {
-                        files.forEach((file) => {
-                            let claimFile = JSON.parse(file.content);
-                            web3.eth.personal.ecRecover(claimFile.offerFileIPFS, claimFile.signature)
-                                .then(addressWhoSigned => {
-                                    
-                                    if(addressWhoSigned === this.state.custodianAccount) {
-                                        ipfs.get(claimFile.offerFileIPFS, function(err, files) {
-                                            files.forEach((file) => {
-                                                let offerFile = JSON.parse(file.content);
-                                                offersChain.push(offerFile);
-            
-                                                if(offersChain.length === offers.length) {
-                                                    this.setState({ offersChain, printOffers: true });
-                                                }
-                                            })
-                                        }.bind(this)) 
-                                    }
-                                });                                                    
-                        });
+                        if(err == null) {
+                            files.forEach((file) => {
+                                let claimFile = JSON.parse(file.content);
+                                web3.eth.personal.ecRecover(claimFile.offerFileIPFS, claimFile.signature)
+                                    .then(addressWhoSigned => {
+                                        
+                                        if(addressWhoSigned === this.state.custodianAccount) {
+                                            ipfs.get(claimFile.offerFileIPFS, function(err, files) {
+                                                if(err == null) {
+                                                    files.forEach((file) => {
+                                                        let offerFile = JSON.parse(file.content);
+                                                        offersChain.push(offerFile);
+                    
+                                                        if(offersChain.length === offers.length) {
+                                                            this.setState({ offersChain, printOffers: true });
+                                                        }
+                                                    })
+                                                } else {
+                                                    console.log(err)
+                                                }//segundo if err
+                                            }.bind(this)) 
+                                        }
+                                    });                                                    
+                            });
+                        } else {
+                            console.log(err)
+                        }//primer if err
                     }.bind(this));
 
                 });
@@ -184,14 +196,11 @@ class BuyOffers extends Component {
     }
 
     async buyOffer(id) {
-        console.log("clicked button offer id: ", id)
-
+        
         let offer = this.state.offersChain.filter(offer => offer.id === id)[0];
         let contract = this.state.contract;
 
         let offers = JSON.parse(localStorage.getItem('offers'));
-
-        console.log("oferta clickada: ", offer);
 
         let userWei = await this.state.web3.eth.getBalance(this.state.account);
         let userEther = await this.state.web3.utils.fromWei(userWei, 'ether')
@@ -206,7 +215,6 @@ class BuyOffers extends Component {
             contract.send(this.state.account, usersToReceiveEth, { from: this.state.account, value: weiToPass })
                 .then(() => {
                     let offersWithoutBoughtOne = this.state.offersChain.filter(offer => offer.id !== id);
-                    console.log(offersWithoutBoughtOne)
                     this.setState({ offersChain: offersWithoutBoughtOne, showNotification: true });
 
                 });
@@ -278,7 +286,7 @@ class BuyOffers extends Component {
 
         let profits = JSON.parse(localStorage.getItem("usersProfit"));
         let userProfit = 0;
-        if(this.state.account in profits) {
+        if(profits !== null && this.state.account in profits) {
             userProfit = profits[this.state.account];
         }
 

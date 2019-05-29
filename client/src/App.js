@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import getWeb3 from "./utils/getWeb3";
 import ipfs from './ipfs';
-import { makeString } from './services/randomString';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 
 import BuyOffers from './components/BuyOffers';
@@ -29,16 +28,7 @@ class App extends Component {
     isDataSubmitted: false,
     isCustodian: false,
     custodianAccount: '0xCDD1c0407f7D4C6bf3DFB7cfc8e70d74B0fA99c3',
-    selectedScheme: "",
-    selectedRegNum: 0,
-    offerCreationColumns: [{ key: 'nombre', name: 'Nombre'}, { key: 'edad', name: 'Edad'}],
-    offerCreationRows: [],
-    selectedIndexes: [],
   };
-
-  handleInputChange = this.handleInputChange.bind(this);
-  handleOfferScheme = this.handleOfferScheme.bind(this);
-  handleOfferNumber = this.handleOfferNumber.bind(this);
   
   componentWillMount = async () => {
     try {
@@ -50,20 +40,8 @@ class App extends Component {
       localStorage.setItem('account', accounts[0]);
       localStorage.setItem("isDataSubmitted", false);
 
-      //----------------------------------------------------
-
-      let rows = [];
-      for (let i = 1; i < 20; i++) {
-        rows.push({
-          nombre: makeString(),
-          edad: i * 2
-        });
-      }
-
 
       var previousPatientHashes = JSON.parse(localStorage.getItem('patientHashes'));
-      var previousSchemesCount = JSON.parse(localStorage.getItem('schemesCount'));
-      var previousNumOfferFiles = JSON.parse(localStorage.getItem('numOfferFiles'));
 
       if(accounts[0] === this.state.custodianAccount) { 
         localStorage.setItem("isCustodian", true);
@@ -94,204 +72,6 @@ class App extends Component {
       console.log(error);
     }
   };
-
-  handleInputChange(event) {
-    const target = event.target;
-    const value = target.type === 'checkbox' ? target.checked : target.value;
-    const name = target.name;
-
-    var data = this.state.ownerData;
-    data[name] = value;
-
-    this.setState({
-      ownerData: data
-    });
-
-    if(target.type === 'checkbox') {
-      let modif = 0;
-      let current = this.state.ownerData.eth;
-
-      if(name === 'checkLastAppointment') {
-        modif = 1;
-      } else if(name === 'checkAllergy') {
-        modif = 3;
-      } else {
-        modif = 5;
-      }
-
-      if(!value) {
-        modif *= -1;
-      }
-
-      data.eth = current + modif;
-
-      this.setState({
-        ownerData: data
-      });
-    }
-  }
-
-  convertToBuffer = async(reader) => {
-    const buffer = await Buffer.from(reader.result);
-    this.setState({buffer});
-  };
-
-  onIPFSSubmit = async(event) => {
-    event.preventDefault();
-
-    const contract = this.state.contract
-    const account = this.state.accounts[0]
-
-    var patient = this.state.ownerData;
-
-    var data = Buffer.from(JSON.stringify(patient));
-    this.setState({ buffer: data });
-
-    // Hash donde se alojan los datos del paciente
-    var ipfsResult = await ipfs.add(data)
-    this.setState({ ipfsHash: ipfsResult[0].hash });
-
-    // Esquema de los datos seleccionados
-    var dataScheme = "";
-
-    if(patient.checkIllness) {
-      dataScheme = dataScheme.concat('enfermedad,')
-    }
-    if(patient.checkTreatment) {
-      dataScheme = dataScheme.concat('tratamiento,')
-    }
-    if(patient.checkAllergy) {
-      dataScheme = dataScheme.concat('alergia,')
-    }
-    if(patient.checkLastAppointment) {
-      dataScheme = dataScheme.concat('ultimacita,')
-    }
-
-    if(dataScheme.localeCompare("")) {
-      dataScheme = dataScheme.slice(0, -1);
-    }
-
-    var hashes = this.state.patientHashes;
-    if(hashes == null) {
-      hashes = {}
-    }
-    hashes[account] = { hash: ipfsResult[0].hash, scheme: dataScheme };
-    this.setState({ patientHashes: hashes });
-
-    var schemes = this.state.schemesCount;
-
-    if(schemes == null) {
-      schemes = {}
-    }
-
-    var newSchemesCount = 1;
-
-    if(dataScheme in schemes) {
-      newSchemesCount = schemes[dataScheme] + 1;
-      schemes[dataScheme] = newSchemesCount;
-    } else {
-      schemes[dataScheme] = 1;
-    }
-
-    this.setState({ schemesCount: schemes });
-
-    localStorage.setItem('patientHashes', JSON.stringify(hashes));
-    localStorage.setItem('schemesCount', JSON.stringify(schemes));
-
-    contract.uploadIPFS(this.state.ipfsHash, {from: account})
-      .then(result => { 
-        alert("Contract used!");
-      })
-  };
-
-  handleReceiveIPFS(event) {
-    event.preventDefault();
-    const contract = this.state.contract
-    const account = this.state.accounts[0]
-    contract.getIPFS({from: account})
-  }
-
-  createOfferFile() {
-
-    if(this.state.numOfferFiles !== 0) {
-      this.setState({
-        numOfferFiles: localStorage.getItem('numOfferFiles')
-      });
-    }
-
-    let offer = {
-      offerId: this.state.numOfferFiles + 1,
-      entity: this.state.entity,
-      scheme: "",
-      numRecords: 2,
-      price: 0
-    }
-
-    this.setState({ numOfferFiles: this.state.numOfferFiles + 1 });
-
-    var offerFile = Buffer.from(JSON.stringify(offer));
-
-    localStorage.setItem('numOfferFiles', this.state.numOfferFiles);
-  }
-
-  handleOfferScheme(event) {
-    localStorage.setItem('selectedScheme', event.target.value)
-  }
-
-  handleOfferNumber(event) {
-    localStorage.setItem('selectedRegNum', event.target.value)   
-  }
-
-  handleOfferCreation = async(event) => {
-    event.preventDefault();
-    var schemes = JSON.parse(localStorage.getItem('schemesCount'));
-    var selectedScheme = localStorage.getItem('selectedScheme');
-    var selectedRegNum = localStorage.getItem('selectedRegNum');
-    var maxReg = schemes[selectedScheme];
-
-    if(selectedRegNum < 1 || selectedRegNum > maxReg) {
-      alert('No se pueden seleccionar ' + selectedRegNum + ' registros')
-    } else {
-      var numOfferFiles = this.state.numOfferFiles;
-      var newNumOfferFiles = numOfferFiles + 1;
-      localStorage.setItem('numOfferFiles', newNumOfferFiles);
-
-      let offer = {
-        offerId: newNumOfferFiles,
-        entity: this.state.entity,
-        scheme: selectedScheme,
-        numRecords: selectedRegNum,
-        price: 10
-      }
-
-      localStorage.setItem('offer', JSON.stringify(offer));
-    }
-  }
-
-// ----------------------------------------------------------------
-
-  onRowsSelected = rows => {
-    this.setState({
-      selectedIndexes: this.state.selectedIndexes.concat(
-        rows.map(r => r.rowIdx)
-      )
-    });
-  };
-
-  onRowsDeselected = rows => {
-    let rowIndexes = rows.map(r => r.rowIdx);
-    this.setState({
-      selectedIndexes: this.state.selectedIndexes.filter(
-        i => rowIndexes.indexOf(i) === -1
-      )
-    });
-  };
-
-  // ---------------------------------------------------------------
-
-  rowGetter = i => {
-    return this.state.offerCreationRows[i]
-  }
 
   render() {
     const account = localStorage.getItem('account');

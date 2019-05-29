@@ -119,7 +119,6 @@ class NewUser extends Component {
       hashes = {}
     }
     hashes[account] = { hash: ipfsResult[0].hash, scheme: dataScheme };
-    //this.setState({ patientHashes: hashes });
 
     // Actualizar conteo de esquemas
 

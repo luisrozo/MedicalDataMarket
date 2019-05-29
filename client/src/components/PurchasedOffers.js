@@ -200,7 +200,7 @@ class PurchasedOffers extends Component {
 
         let profits = JSON.parse(localStorage.getItem("usersProfit"));
         let userProfit = 0;
-        if(this.state.account in profits) {
+        if(profits !== null && this.state.account in profits) {
             userProfit = profits[this.state.account];
         }
         

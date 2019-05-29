@@ -335,36 +335,47 @@ class Custodian extends Component {
   }
 
   render() {
+    let hasOffers = true;
     const schemesCount = JSON.parse(localStorage.getItem('schemesCount'));
-    const numSchemes = Object.keys(schemesCount).length;
-    const columns = [
-      {
-        Header: "Esquema",
-        accessor: "esquema",
-      },
-      {
-        Header: "Núm. Registros",
-        accessor: "numReg"
-      }
-    ]
-    var data = [];
-    for (var i = 0; i < numSchemes; i++) {
-      var key = Object.keys(schemesCount)[i];
-      var value = schemesCount[key];
-      var dataValue = {
-        esquema: key,
-        numReg: value
-      }
-      data.push(dataValue);
+
+    if(schemesCount === null) {
+      hasOffers = false;
     }
 
-    let printTable = this.state.printTable;
-    const offer = this.state.offer;
+    let columns, printTable, emptyOffer, data, offer;
 
-    let emptyOffer = false;
+    if(hasOffers) {
+      const numSchemes = Object.keys(schemesCount).length;
+      columns = [
+        {
+          Header: "Esquema",
+          accessor: "esquema",
+        },
+        {
+          Header: "Núm. Registros",
+          accessor: "numReg"
+        }
+      ]
+      data = [];
+      for (var i = 0; i < numSchemes; i++) {
+        var key = Object.keys(schemesCount)[i];
+        var value = schemesCount[key];
+        var dataValue = {
+          esquema: key,
+          numReg: value
+        }
+        data.push(dataValue);
+      }
 
-    if(Object.keys(offer).length === 0)
-      emptyOffer = true;
+      printTable = this.state.printTable;
+      offer = this.state.offer;
+
+      emptyOffer = false;
+
+      if(Object.keys(offer).length === 0)
+        emptyOffer = true;
+      
+    }
 
     return (
       <div>
@@ -374,74 +385,86 @@ class Custodian extends Component {
         <center>
         <h1>¡Eres el custodian!</h1>
 
-        <h3>Estos son los esquemas disponibles para crear ofertas</h3>
-
-        <ReactTable
-          columns={columns}
-          data={data}
-          showPagination={false}
-          minRows={0}
-          getProps={this.getProps}
-        >
-        </ReactTable>
-
-        <form onSubmit={this.onOfferSubmit}>
-          <label>
-            Selecciona un esquema para empezar a crear una oferta<br />
-            <select value={this.state.schemeSelected || ''} onChange={this.handleSelectChange}>
-              <option value='' disabled>Selecciona un esquema...</option>
-              {
-                Object.keys(schemesCount).map((key) => ( 
-                  <option key={key} value={key}>{key}</option>
-                ))  
-              }
-            </select>
-          </label>
-        </form>
-
-        { printTable ?
+        { hasOffers ? 
           <React.Fragment>
+            
+            <h3>Estos son los esquemas disponibles para crear ofertas</h3>
+
             <ReactTable
-              columns={this.state.userColumns}
-              data={this.state.userData}
+              columns={columns}
+              data={data}
               showPagination={false}
               minRows={0}
               getProps={this.getProps}
-              noDataText='No quedan registros con el esquema seleccionado'
             >
             </ReactTable>
+
+            <form onSubmit={this.onOfferSubmit}>
+              <label>
+                Selecciona un esquema para empezar a crear una oferta<br />
+                <select value={this.state.schemeSelected || ''} onChange={this.handleSelectChange}>
+                  <option value='' disabled>Selecciona un esquema...</option>
+                  {
+                    Object.keys(schemesCount).map((key) => ( 
+                      <option key={key} value={key}>{key}</option>
+                    ))  
+                  }
+                </select>
+              </label>
+            </form>
+
+            { printTable ?
+              <React.Fragment>
+                <ReactTable
+                  columns={this.state.userColumns}
+                  data={this.state.userData}
+                  showPagination={false}
+                  minRows={0}
+                  getProps={this.getProps}
+                  noDataText='No quedan registros con el esquema seleccionado'
+                >
+                </ReactTable>
+              </React.Fragment>
+              :
+              <React.Fragment>
+                
+              </React.Fragment>
+            }
+
+            <h3>Oferta</h3>
+
+            { emptyOffer ? 
+              <React.Fragment>
+                <p><i>Aún no has añadido ningún registro. Empieza por seleccionar un esquema y añade registros a la oferta.</i></p>
+              </React.Fragment>
+              :
+              <React.Fragment>
+                <p><b>Entidad</b>: {offer.entidad} </p>
+                <p><b>Esquema</b>: {offer.esquema} </p>
+                <p><b>Número de registros</b>: {offer.numReg} </p>
+                <p><b>Precio</b>: {offer.precio} </p>
+
+                <button
+                  style={{ backgroundColor: "blue", color: "#fefefe" }}
+                  onClick={() => {
+                    this.onOfferSubmit();
+                  }}
+                >Crear oferta</button>
+              </React.Fragment>
+            }
+
+            <Alert style={{ width: "50%" }} color="info" isOpen={this.state.visible} toggle={this.onDismiss}>
+            Oferta subida con éxito
+            </Alert>
           </React.Fragment>
           :
           <React.Fragment>
-            
+            <Alert style={{ width: "30%" }} color="warning" isOpen={true}>
+                No hay registros disponibles.
+            </Alert>
           </React.Fragment>
         }
 
-        <h3>Oferta</h3>
-
-        { emptyOffer ? 
-          <React.Fragment>
-            <p><i>Aún no has añadido ningún registro. Empieza por seleccionar un esquema y añade registros a la oferta.</i></p>
-          </React.Fragment>
-          :
-          <React.Fragment>
-            <p><b>Entidad</b>: {offer.entidad} </p>
-            <p><b>Esquema</b>: {offer.esquema} </p>
-            <p><b>Número de registros</b>: {offer.numReg} </p>
-            <p><b>Precio</b>: {offer.precio} </p>
-
-            <button
-              style={{ backgroundColor: "blue", color: "#fefefe" }}
-              onClick={() => {
-                this.onOfferSubmit();
-              }}
-            >Crear oferta</button>
-          </React.Fragment>
-        }
-        
-        <Alert style={{ width: "50%" }} color="info" isOpen={this.state.visible} toggle={this.onDismiss}>
-        Oferta subida con éxito
-        </Alert>
 
 
       </center></div>

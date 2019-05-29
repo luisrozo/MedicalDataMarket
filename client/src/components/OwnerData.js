@@ -17,7 +17,7 @@ class OwnerData extends Component {
     
     let profits = JSON.parse(localStorage.getItem("usersProfit"));
     let userProfit = 0;
-    if(account in profits) {
+    if(profits !== null && account in profits) {
         userProfit = profits[account];
     }
 

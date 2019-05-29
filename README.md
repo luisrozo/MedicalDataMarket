@@ -32,3 +32,66 @@ El uso de IPFS permite abaratar considerablemente los costes de almacenamiento d
 Con estos cálculos, se puede observar como almacenar 1GB, en una cadena de bloques de Ethereum, costaría **1.640.000€**.
 
 Por tanto, subiendo la información a IPFS y almacenando en la cadena de bloques únicamente el _hash criptográfico_, el espacio ahorrado es indispensable.
+
+## Instalación
+
+  
+
+Para poder usar la aplicación, será necesario instalar todo lo que necesita la misma para funcionar, dentro de un sistema operativo basado en Linux:
+
+  
+
+-  **Navegador web** que permita el uso de almacenamiento local (*local storage*) y el uso de la extensión MetaMask. Se recomienda usar Google Chrome.
+
+  
+
+-  **NodeJS** (versión 8.9.4 o posterior) como gestor de paquetes.
+
+  
+
+-  **Ganache**. Este programa crea una cadena de bloques Ethereum de prueba cada vez que se abre, proporcionando hasta 10 cuentas distintas con 100 ETH de prueba cada una. Será la cadena de bloques sobre la que corra la aplicación.
+
+  
+
+-  **MetaMask**. Esta extensión de navegador web permite conectar una cadena de bloques con el navegador, permitiendo la interacción entre aplicación y cadena de bloques. Además, es necesario importar la red creada por Ganache (normalmente en la dirección http://127.0.0.1:7545), así como las cuentas Ethereum que se deseen usar en la aplicación.
+
+  
+
+-  **Truffle**. Para descargar el framework de desarrollo de contratos inteligentes, bastará con escribir en una consola de comandos: 
+```bash
+npm install -g truffle
+```
+
+Una vez instalado todo lo anterior, hay que descargar la aplicación clonando o descargando este repositorio.  
+
+Es importante elegir una cuenta de las que ofrece MetaMask para que actúe como custodian en la aplicación. Para ello, basta con copiar la dirección de una de las cuentas y pegarla en los siguientes ficheros de la carpeta */client/src*:
+
+-   App.js, línea 31. Con mayúsculas y minúsculas igual que en Ganache.
+    
+-   Dentro de la carpeta indicada, en la carpeta */components*, en el fichero BuyOffers.js, línea 35. Todas las letras en minúsculas.
+
+Una vez hecho todo lo anterior, será necesario seguir los siguientes pasos:  
+
+1.  Abrir Ganache.
+    
+2.  Abrir una terminal en la carpeta raíz del proyecto.
+    
+3.  Desplegar el contrato inteligente mediante los siguientes comandos: 
+```bash
+truffle compile
+truffle migrate
+```
+    
+4.  Copiar el fichero *IPFSInbox.json* generado en la carpeta */build/contracts* y pegarlo en la carpeta */client/src*.
+    
+5.  Abrir la carpeta */client* en una terminal.
+    
+6.  Instalar dependencias necesarias con el comando:
+```bash
+sudo npm install
+```    
+7.  Iniciar la aplicación con el comando:
+```bash
+sudo npm start
+```
+Si MetaMask ya está sincronizado con Ganache, y se han importado las cuentas, será cuestión de acceder a la dirección [localhost:3000](http://localhost:3000) para acceder a la aplicación.
