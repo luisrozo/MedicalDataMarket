@@ -31,7 +31,9 @@ class App extends Component {
   };
   
   componentWillMount = async () => {
-    try {
+    document.title = "Medical Data Market";
+    
+    try {      
       
       const web3 = await getWeb3();
 

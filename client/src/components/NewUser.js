@@ -13,7 +13,7 @@ class NewUser extends Component {
 
   state = {
     ownerData: {
-      name: "",
+      town: "",
       age: 0,
       illness: "",
       checkIllness: false,
@@ -35,6 +35,7 @@ class NewUser extends Component {
   handleInputChange = this.handleInputChange.bind(this);
 
   componentWillMount = async () => {
+    document.title = "Medical Data Market - Validar datos";
     var newOwnerData = await generateData();
 
     this.setState({
@@ -163,9 +164,9 @@ class NewUser extends Component {
         <form id="ipfs-hash-form" className="scep-form" onSubmit={this.onIPFSSubmit}>
 
           <label>
-            <b>Nombre</b> 
+            <b>Población</b> 
             <br /> 
-            <input style={inputStyle} readOnly size="60" name="name" type="text" value={this.state.ownerData.name || ''} onChange={this.handleInputChange} />
+            <input style={inputStyle} readOnly size="60" name="town" type="text" value={this.state.ownerData.town || ''} onChange={this.handleInputChange} />
           </label>
           <br /><br />
 

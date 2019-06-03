@@ -47,6 +47,7 @@ class Custodian extends Component {
   }
 
   componentWillMount = async () => {
+    document.title = "Medical Data Market - Custodian";
     document.body.style.paddingBottom = "200px";
 
     this.loadBlockchainData();
@@ -134,8 +135,8 @@ class Custodian extends Component {
   getUserColumns(scheme) {
     let userColumns = [
       {
-        Header: "Nombre",
-        accessor: "nombre",
+        Header: "Población",
+        accessor: "poblacion",
       },
       {
         Header: "Edad",
@@ -232,7 +233,7 @@ class Custodian extends Component {
   generateDataValue(user, account) {
     let dataValue = {
       account: account,
-      nombre: user.name,
+      poblacion: user.town,
       edad: user.age
     }
 

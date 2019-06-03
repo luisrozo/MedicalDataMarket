@@ -43,6 +43,10 @@ class BuyOffers extends Component {
     handleOrder = this.handleOrder.bind(this);
     onDismiss = this.onDismiss.bind(this);
 
+    componentDidMount() {
+        document.title = "Medical Data Market - Comprar ofertas";
+    }
+
     selectOffer(offer) {
         let filters = [];
 

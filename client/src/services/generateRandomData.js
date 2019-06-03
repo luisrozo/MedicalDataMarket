@@ -10,8 +10,8 @@ export function generateData() {
     return client.generate({
         count: 1,
         fields: [{
-            name: 'name',
-            type: 'First Name'
+            name: 'town',
+            type: 'City'
         }, {
             name: 'age',
             type: 'Number',
@@ -40,7 +40,7 @@ export function generateData() {
 
         var patient = initOwner();
 
-        patient.name = record.name;
+        patient.town = record.town;
         patient.age = parseInt(record.age);
         patient.illness = record.illness;
         patient.treatment = record.treatment;

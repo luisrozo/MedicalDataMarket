@@ -27,16 +27,17 @@ class PurchasedOffers extends Component {
 
     getProps=() => {
         return {
-          style: {
-            marginBottom: "50px",
-            marginRight: "250px",
-            marginLeft: "250px",
-            marginTop: "50px"
-          }
+            style: {
+                marginBottom: "50px",
+                marginRight: "250px",
+                marginLeft: "250px",
+                marginTop: "50px"
+            }
         }
       }
 
     componentWillMount = async () => {
+        document.title = "Medical Data Market - Ofertas compradas";
         const web3 = new Web3(Web3.givenProvider || "http://localhost:3000");
         const accounts = await web3.eth.getAccounts();
 
@@ -95,8 +96,8 @@ class PurchasedOffers extends Component {
 
         let userColumns = [
             {
-                Header: "Nombre",
-                accessor: "nombre",
+                Header: "Población",
+                accessor: "poblacion",
             },
             {
                 Header: "Edad",
@@ -126,7 +127,7 @@ class PurchasedOffers extends Component {
         for(var i = 0; i < this.state.usersData.length; i++) {
             
             let dataValue = {
-                nombre: this.state.usersData[i].name,
+                poblacion: this.state.usersData[i].town,
                 edad: this.state.usersData[i].age
             }
 

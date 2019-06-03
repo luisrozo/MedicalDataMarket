@@ -11,6 +11,10 @@ import styles from './navbarStyle';
 
 class OwnerData extends Component {
 
+  componentDidMount() {
+    document.title = "Medical Data Market - Mis datos";
+  }
+
   render() {
     const ownerData = JSON.parse(localStorage.getItem('ownerData'));
     const account = localStorage.getItem("account");
@@ -44,9 +48,9 @@ class OwnerData extends Component {
         <h1> Tus datos personales </h1><h3>Estos son los datos que has autorizado para ser vendidos</h3>
 
         <label>
-            <b>Nombre</b> 
+            <b>Población</b> 
             <br /> 
-            {ownerData.name}
+            {ownerData.town}
           </label>
           <br /><br />
 
