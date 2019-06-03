@@ -106,16 +106,63 @@ class PurchasedOffers extends Component {
         ];
 
         if(scheme.includes("enfermedad")) {
-            userColumns.push({ Header: "Enfermedad", accessor: "enfermedad", filterable: true });
+            userColumns.push({ 
+                Header: "Enfermedad",
+                accessor: "enfermedad",
+                filterable: true,
+                Filter: ({filter, onChange}) => (
+                    <input
+                        onChange={event => onChange(event.target.value)}
+                        value={filter ? filter.value : ''}
+                        placeholder={"Filtrar..."}
+                    />
+                ),
+            });
         }
         if(scheme.includes("tratamiento")) {
-            userColumns.push({ Header: "Tratamiento", accessor: "tratamiento", filterable: true });
+            userColumns.push({ 
+                Header: "Tratamiento",
+                accessor: "tratamiento",
+                filterable: true,
+                Filter: ({filter, onChange}) => (
+                    <input
+                        onChange={event => onChange(event.target.value)}
+                        value={filter ? filter.value : ''}
+                        placeholder={"Filtrar..."}
+                        style={{ width: "80%" }}
+                    />
+                ),
+            });
         }
         if(scheme.includes("alergia")) {
-            userColumns.push({ Header: "Alergia", accessor: "alergia", filterable: true });
+            userColumns.push({ 
+                Header: "Alergia", 
+                accessor: "alergia", 
+                filterable: true,
+                Filter: ({filter, onChange}) => (
+                    <input
+                        onChange={event => onChange(event.target.value)}
+                        value={filter ? filter.value : ''}
+                        placeholder={"Filtrar..."}
+                        style={{ width: "80%" }}
+                    />
+                ),
+             });
         }
         if(scheme.includes("ultimacita")) {
-            userColumns.push({ Header: "Última cita", accessor: "ultimacita", filterable: true });
+            userColumns.push({ 
+                Header: "Última cita", 
+                accessor: "ultimacita", 
+                filterable: true,
+                Filter: ({filter, onChange}) => (
+                    <input
+                        onChange={event => onChange(event.target.value)}
+                        value={filter ? filter.value : ''}
+                        placeholder={"Filtrar..."}
+                        style={{ width: "80%" }}
+                    />
+                ),
+             });
         }
 
         return userColumns;
@@ -166,16 +213,40 @@ class PurchasedOffers extends Component {
                         Header: "Esquema",
                         accessor: "esquema",
                         filterable: true,
+                        Filter: ({filter, onChange}) => (
+                            <input
+                                onChange={event => onChange(event.target.value)}
+                                value={filter ? filter.value : ''}
+                                placeholder={"Filtrar..."}
+                                style={{ width: "80%" }}
+                            />
+                        ),
                     },
                     {
                         Header: "Núm. Registros",
                         accessor: "numReg",
                         filterable: true,
+                        Filter: ({filter, onChange}) => (
+                            <input
+                                onChange={event => onChange(event.target.value)}
+                                value={filter ? filter.value : ''}
+                                placeholder={"Filtrar..."}
+                                style={{ width: "80%" }}
+                            />
+                        ),
                     },
                     {
                         Header: "Precio (ETH)",
                         accessor: "precio",
                         filterable: true,
+                        Filter: ({filter, onChange}) => (
+                            <input
+                                onChange={event => onChange(event.target.value)}
+                                value={filter ? filter.value : ''}
+                                placeholder={"Filtrar..."}
+                                style={{ width: "80%" }}
+                            />
+                        ),
                     }
                 ]
                 
@@ -255,8 +326,17 @@ class PurchasedOffers extends Component {
                                     getTrProps={(state, rowInfo, column) => {
                                         return {
                                         style: {
+                                            cursor: "pointer",
                                             background: rowInfo.original.id === this.state.selectedOfferId ? 'lightcyan' : 'white'
                                         }
+                                        }
+                                    }}
+                                    getTheadThProps={() => {
+                                        return {
+                                            style: {
+                                                backgroundColor: "#d1d1d1",
+                                                fontSize: "120%"
+                                            }
                                         }
                                     }}
                                     >
@@ -277,6 +357,18 @@ class PurchasedOffers extends Component {
                                     showPagination={false}
                                     minRows={0}
                                     getProps={this.getProps}
+                                    getTheadThProps={() => {
+                                        return {
+                                            style: {
+                                                backgroundColor: "#d1d1d1",
+                                                fontSize: "120%"
+                                            }
+                                        }
+                                    }}
+                                    defaultFilterMethod={ (filter, row, column) => {
+                                        const id = filter.pivotId || filter.id
+                                        return row[id] !== undefined ? String(row[id]).includes(filter.value) : true
+                                    }}
                                     >
                                 </ReactTable>
                             </React.Fragment>

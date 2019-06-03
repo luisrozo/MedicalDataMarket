@@ -13,6 +13,8 @@ import {
     NavLink,
     } from 'reactstrap';
 
+import { Form, FormGroup, Input, CustomInput } from 'reactstrap';
+
 import { Alert } from 'reactstrap';
 import styles from './navbarStyle';
 
@@ -318,35 +320,43 @@ class BuyOffers extends Component {
                     <h1>Ofertas</h1>
 
                     <h3>Puedes filtrar las ofertas según el esquema deseado:</h3>
-                    <label>
-                        Enfermedad <input name="filterIllness" type="checkbox" checked={this.state.filterIllness || false} onChange={this.handleFilterChange} />
-                        ·
-                    </label>
-                    <label>
-                        Tratamiento <input name="filterTreatment" type="checkbox" checked={this.state.filterTreatment || false} onChange={this.handleFilterChange} />
-                        ·
-                    </label>
-                    <label>
-                        Alergia <input name="filterAllergy" type="checkbox" checked={this.state.filterAllergy || false} onChange={this.handleFilterChange} />
-                        ·
-                    </label>
-                    <label>
-                        Última cita <input name="filterLastAppointment" type="checkbox" checked={this.state.filterLastAppointment || false} onChange={this.handleFilterChange} />
-                    </label>
 
-                    <form>
-                        <label>
-                            <select value={this.state.orderSelected || ''} onChange={this.handleOrder}>
-                                <option value='' disabled>Ordenar ofertas...</option>
-                                <option key="pAsc" value="precioAsc">Por precio (de menos a más cara)</option>
-                                <option key="pDesc" value="precioDesc">Por precio (de más a menos cara)</option>                                                                
-                                <option key="nrAsc" value="numRegAsc">Por número de registros (de menor a mayor)</option>
-                                <option key="nrDesc" value="numRegDesc">Por número de registros (de mayor a menor)</option>
-                            </select>
-                        </label>
-                    </form>
+                    <Form style={{ width: "700px" }} id="filter-form" className="scep-form">
+                        <Row form>
+                            <Col md={3}>
+                                <FormGroup>
+                                    <CustomInput type="checkbox" id="filterIllness" name="filterIllness" label="Enfermedad" checked={this.state.filterIllness || false} onChange={this.handleFilterChange} />
+                                </FormGroup>
+                            </Col>
+                            <Col md={3}>
+                                <FormGroup>
+                                    <CustomInput type="checkbox" id="filterTreatment" name="filterTreatment" label="Tratamiento" checked={this.state.filterTreatment || false} onChange={this.handleFilterChange} />
+                                </FormGroup>
+                            </Col>
+                            <Col md={3}>
+                                <FormGroup>
+                                    <CustomInput type="checkbox" id="filterAllergy" name="filterAllergy" label="Alergia" checked={this.state.filterAllergy || false} onChange={this.handleFilterChange} />
+                                </FormGroup>
+                            </Col>
+                            <Col md={3}>
+                                <FormGroup>
+                                    <CustomInput type="checkbox" id="filterLastAppointment" name="filterLastAppointment" label="Última cita" checked={this.state.filterLastAppointment || false} onChange={this.handleFilterChange} />
+                                </FormGroup>
+                            </Col>
+                        </Row>
+                    </Form>
 
-                    <Alert style={{ width: "50%" }} color="info" isOpen={this.state.showNotification} toggle={this.onDismiss}>
+                    <Input type="select" value={this.state.orderSelected || ''} onChange={this.handleOrder} style={{ width: "500px" }}>
+                        <option value='' disabled>Ordenar ofertas...</option>
+                        <option key="pAsc" value="precioAsc">Por precio (de menor a mayor)</option>
+                        <option key="pDesc" value="precioDesc">Por precio (de mayor a menor)</option>                                                                
+                        <option key="nrAsc" value="numRegAsc">Por número de registros (de menor a mayor)</option>
+                        <option key="nrDesc" value="numRegDesc">Por número de registros (de mayor a menor)</option>
+                    </Input>
+
+                    <br />
+
+                    <Alert style={{ width: "700px" }} color="info" isOpen={this.state.showNotification} toggle={this.onDismiss}>
                         Oferta comprada con éxito. Puedes ver tus ofertas compradas <a href="/purchasedOffers">aquí</a>.
                     </Alert>
 
@@ -362,7 +372,7 @@ class BuyOffers extends Component {
                                 </React.Fragment>
                                 :
                                 <React.Fragment>
-                                    <Alert style={{ width: "50%" }} color="warning" isOpen={true}>
+                                    <Alert style={{ width: "700px" }} color="warning" isOpen={true}>
                                         No hay ofertas disponibles.
                                     </Alert>
                                 </React.Fragment>
